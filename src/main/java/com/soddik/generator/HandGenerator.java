@@ -1,36 +1,25 @@
 package com.soddik.generator;
 
 import com.soddik.dto.PokerHand;
+import com.soddik.exception.CardAttributeException;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static com.soddik.exception.CardAttributeException.UnexpectedCardAttributeValueException;
-
 public class HandGenerator {
-    private final List<String> kinds = List.of("S", "H", "D", "C");
+    private final DeckGenerator deckGenerator;
 
-    public Map<String, List<Integer>> generateDeck() {
-        Map<String, List<Integer>> deck = new HashMap<>();
-        for (String kind : kinds) {
-            List<Integer> cards = new ArrayList<>();
-            for (int index = 2; index < 15; index++) {
-                cards.add(index);
-            }
-
-            deck.put(kind, cards);
-        }
-
-        return deck;
+    public HandGenerator(DeckGenerator deckGenerator) {
+        this.deckGenerator = deckGenerator;
+        deckGenerator.generateDeck();
     }
 
-    public PokerHand generateHand(Map<String, List<Integer>> deck) {
+    public PokerHand generateHand() {
+        Map<String, List<Integer>> deck = deckGenerator.getDeck();
         StringBuilder sb = new StringBuilder();
         for (int cardIndex = 0; cardIndex < 5; cardIndex++) {
-            List<String> actualKinds = kinds.stream()
+            List<String> actualKinds = deckGenerator.getKinds().stream()
                     .filter(kind -> deck.get(kind).size() != 0)
                     .toList();
             String randomKind = actualKinds.get(ThreadLocalRandom.current().nextInt(0, actualKinds.size()));
@@ -42,9 +31,7 @@ public class HandGenerator {
 
     private void getRandomCard(Map<String, List<Integer>> deck, StringBuilder sb, String randomKind) {
         Integer value = deck.get(randomKind).get(ThreadLocalRandom.current().nextInt(0, deck.get(randomKind).size()));
-
         deck.get(randomKind).remove(value);
-
         if (value < 10) {
             sb.append(value);
         } else {
@@ -54,7 +41,8 @@ public class HandGenerator {
                 case 12 -> "Q";
                 case 11 -> "J";
                 case 10 -> "T";
-                default -> throw new UnexpectedCardAttributeValueException(String.format("Unexpected card value %s", value));
+                default ->
+                        throw new CardAttributeException.UnexpectedCardAttributeValueException(String.format("Unexpected card value %s", value));
             };
 
             sb.append(strValue);

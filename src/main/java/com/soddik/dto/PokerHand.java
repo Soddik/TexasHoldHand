@@ -18,7 +18,6 @@ import static java.util.stream.Collectors.groupingBy;
 public final class PokerHand implements Comparable<PokerHand> {
     private final Integer[][] cards = new Integer[5][2];
     private final List<Integer> nonCombinationCards = new ArrayList<>();
-
     private final HandValue combination;
     private Integer combinationValue = 0;
 
@@ -47,11 +46,135 @@ public final class PokerHand implements Comparable<PokerHand> {
     }
 
     public List<Integer> getNonCombinationCards() {
-        return new ArrayList<>(nonCombinationCards);
+        return List.copyOf(nonCombinationCards);
     }
 
     public Integer getCombinationValue() {
         return combinationValue;
+    }
+
+    private void parseString(String string) {
+        String[] strCards = string.split(" ");
+        if (strCards.length == 5) {
+            createHandAndSort(strCards);
+        } else {
+            throw new HandCardAmountException(
+                    String.format("There must be exactly 5 cards in the hand, but there are %s", strCards.length));
+        }
+    }
+
+    private void createHandAndSort(String[] strCards) {
+        for (int index = 0; index < strCards.length; index++) {
+            String[] card = strCards[index].split("");
+            cards[index] = createCard(card);
+        }
+        sortCardsByValue(cards);
+    }
+
+    private Integer[] createCard(String[] card) {
+        if (card.length == 2) {
+            Integer value = switch (card[0]) {
+                case "A" -> 14;
+                case "K" -> 13;
+                case "Q" -> 12;
+                case "J" -> 11;
+                case "T" -> 10;
+                default -> validateNumericValue(card[0]);
+            };
+
+            Integer kind = switch (card[1]) {
+                case "S" -> 20;
+                case "H" -> 21;
+                case "D" -> 22;
+                case "C" -> 23;
+                default ->
+                        throw new UnexpectedCardAttributeKindException(String.format("Unexpected card kind %s", card[1]));
+            };
+
+            uniquenessOfCardsInHandCheck(value, kind);
+            return new Integer[]{value, kind};
+        } else {
+            throw new CardAttributeException(
+                    String.format("The card should contain 2 attributes, but it contains %s", card.length));
+        }
+    }
+
+    private Integer validateNumericValue(String value) {
+        if (value.matches("[2-9]")) {
+            int num = Integer.parseInt(value);
+            if (num > 1 && num < 10) {
+                return num;
+            }
+        }
+        throw new UnexpectedCardAttributeValueException(String.format("Unexpected card value %s", value));
+    }
+
+    private void uniquenessOfCardsInHandCheck(int value, int kind) {
+        for (Integer[] card : cards) {
+            if (card[0] != null && card[1] != null) {
+                if (card[0] == value && card[1] == kind) {
+                    throw new UniqueCardException(
+                            String.format("Unique cards must be in hand, but there is a duplicate with value: %s kind: %s", value, kind));
+                }
+            }
+        }
+    }
+
+    private void sortCardsByValue(Integer[][] cards) {
+        for (int i = 0; i < cards.length; i++) {
+            int pos = i;
+
+            int value = cards[i][0];
+            int kind = cards[i][1];
+
+            for (int j = i + 1; j < cards.length; j++) {
+                if (cards[j][0] < value) {
+                    pos = j;
+                    value = cards[j][0];
+                    kind = cards[j][1];
+                }
+            }
+
+            cards[pos][0] = cards[i][0];
+            cards[pos][1] = cards[i][1];
+
+            cards[i][0] = value;
+            cards[i][1] = kind;
+        }
+    }
+
+    private void addNonCombinationCard(Integer value) {
+        nonCombinationCards.add(value);
+    }
+
+    @Override
+    public int compareTo(PokerHand hand) {
+        int result = hand.combination.ordinal() - this.combination.ordinal();
+        if (result == 0) {
+            result = compareByCombinationValue(hand);
+        }
+        return result;
+    }
+
+    private int compareByCombinationValue(PokerHand hand) {
+        int result = hand.combinationValue - this.combinationValue;
+        if (result == 0) {
+            result = calcNonCombinationDiff(hand);
+        }
+        return result;
+    }
+
+    private int calcNonCombinationDiff(PokerHand hand) {
+        int handMax = getSumOfNonCombinationCards(hand);
+        int thisMax = getSumOfNonCombinationCards(this);
+        return handMax - thisMax;
+    }
+
+    private int getSumOfNonCombinationCards(PokerHand hand) {
+        return hand.getNonCombinationCards()
+                .stream()
+                .mapToInt(value -> value)
+                .sum();
     }
 
     @Override
@@ -77,7 +200,7 @@ public final class PokerHand implements Comparable<PokerHand> {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Hand: ");
+        sb.append("Hand[ Combination: ");
         sb.append(combination).append(", ");
         sb.append("Cards: ");
         for (Integer[] card : cards) {
@@ -90,7 +213,8 @@ public final class PokerHand implements Comparable<PokerHand> {
                     case 12 -> "Q";
                     case 11 -> "J";
                     case 10 -> "T";
-                    default -> throw new UnexpectedCardAttributeValueException(String.format("Unexpected card value %s", card[0]));
+                    default ->
+                            throw new UnexpectedCardAttributeValueException(String.format("Unexpected card value %s", card[0]));
                 };
 
                 sb.append(strValue);
@@ -101,136 +225,14 @@ public final class PokerHand implements Comparable<PokerHand> {
                 case 21 -> "H";
                 case 22 -> "D";
                 case 23 -> "C";
-                default -> throw new UnexpectedCardAttributeKindException(String.format("Unexpected card kind %s", card[0]));
+                default ->
+                        throw new UnexpectedCardAttributeKindException(String.format("Unexpected card kind %s", card[0]));
             };
 
             sb.append(kind).append(" ");
         }
-        return sb.toString().trim();
-    }
-
-    @Override
-    public int compareTo(PokerHand hand) {
-        int result = hand.combination.ordinal() - this.combination.ordinal();
-
-        if (result == 0) {
-            result = deepCombinationCheck(hand);
-        }
-
-        return result;
-    }
-
-    private void addNonCombinationCard(Integer value) {
-        nonCombinationCards.add(value);
-    }
-
-    private int deepCombinationCheck(PokerHand hand) {
-        int result = hand.combinationValue - this.combinationValue;
-        if (result == 0) {
-            result = calcDiff(hand);
-        }
-        return result;
-    }
-
-    private int calcDiff(PokerHand hand) {
-        int handMax = getSum(hand);
-
-        int thisMax = getSum(this);
-
-        return handMax - thisMax;
-    }
-
-    private int getSum(PokerHand hand) {
-        return hand.getNonCombinationCards()
-                .stream()
-                .mapToInt(value -> value)
-                .sum();
-    }
-
-    private void parseString(String string) {
-        String[] strCards = string.split(" ");
-        if (strCards.length == 5) {
-            for (int index = 0; index < strCards.length; index++) {
-                String[] card = strCards[index].split("");
-
-                if (card.length == 2) {
-                    Integer value = switch (card[0]) {
-                        case "A" -> 14;
-                        case "K" -> 13;
-                        case "Q" -> 12;
-                        case "J" -> 11;
-                        case "T" -> 10;
-                        default -> validateValue(card[0]);
-                    };
-
-                    Integer kind = switch (card[1]) {
-                        case "S" -> 20;
-                        case "H" -> 21;
-                        case "D" -> 22;
-                        case "C" -> 23;
-                        default -> throw new UnexpectedCardAttributeKindException(String.format("Unexpected card kind %s", card[1]));
-                    };
-
-                    uniqueCheck(value, kind);
-
-                    cards[index][0] = value;
-                    cards[index][1] = kind;
-                } else {
-                    throw new CardAttributeException(
-                            String.format("The card should contain 2 attributes, but it contains %s", card.length));
-                }
-            }
-
-            sortByValue(cards);
-        } else {
-            throw new HandCardAmountException(
-                    String.format("There must be exactly 5 cards in the hand, but there are %s", strCards.length));
-        }
-    }
-
-    private Integer validateValue(String value) {
-        if (value.matches("[2-9]")) {
-            int num = Integer.parseInt(value);
-            if (num > 1 && num < 10) {
-                return num;
-            }
-        }
-        throw new UnexpectedCardAttributeValueException(String.format("Unexpected card value %s", value));
-    }
-
-
-    private void uniqueCheck(int value, int kind) {
-        for (Integer[] card : cards) {
-            if (card[0] != null && card[1] != null) {
-                if (card[0] == value && card[1] == kind) {
-                    throw new UniqueCardException(
-                            String.format("Unique cards must be in hand, but there is a duplicate with value: %s kind: %s", value, kind));
-                }
-            }
-        }
-    }
-
-    private void sortByValue(Integer[][] cards) {
-        for (int i = 0; i < cards.length; i++) {
-            int pos = i;
-
-            int value = cards[i][0];
-            int kind = cards[i][1];
-
-            for (int j = i + 1; j < cards.length; j++) {
-                if (cards[j][0] < value) {
-                    pos = j;
-                    value = cards[j][0];
-                    kind = cards[j][1];
-                }
-            }
-
-            cards[pos][0] = cards[i][0];
-            cards[pos][1] = cards[i][1];
-
-            cards[i][0] = value;
-            cards[i][1] = kind;
-        }
+        sb.append("]");
+        return sb.toString();
     }
 
     private interface HandValueValidator extends Function<PokerHand, HandValue> {
