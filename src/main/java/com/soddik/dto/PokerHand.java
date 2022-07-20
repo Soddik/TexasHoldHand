@@ -23,17 +23,17 @@ public final class PokerHand implements Comparable<PokerHand> {
 
     public PokerHand(String hand) {
         parseString(hand);
-        this.combination = HandValueValidator
+        this.combination = CombinationValidator
                 .isRoyalFlush()
-                .or(HandValueValidator.isStraightFlush())
-                .or(HandValueValidator.isFourOfAKind())
-                .or(HandValueValidator.isFullHouse())
-                .or(HandValueValidator.isFlush())
-                .or(HandValueValidator.isStraight())
-                .or(HandValueValidator.isThreeOfAKind())
-                .or(HandValueValidator.isTwoPair())
-                .or(HandValueValidator.isOnePair())
-                .or(HandValueValidator.highCard())
+                .or(CombinationValidator.isStraightFlush())
+                .or(CombinationValidator.isFourOfAKind())
+                .or(CombinationValidator.isFullHouse())
+                .or(CombinationValidator.isFlush())
+                .or(CombinationValidator.isStraight())
+                .or(CombinationValidator.isThreeOfAKind())
+                .or(CombinationValidator.isTwoPair())
+                .or(CombinationValidator.isOnePair())
+                .or(CombinationValidator.highCard())
                 .apply(this);
     }
 
@@ -146,19 +146,15 @@ public final class PokerHand implements Comparable<PokerHand> {
 
     @Override
     public int compareTo(PokerHand hand) {
-        int result = hand.combination.ordinal() - this.combination.ordinal();
-        if (result == 0) {
-            result = compareByCombinationValue(hand);
-        }
-        return result;
+        return hand.combination.ordinal() - this.combination.ordinal() != 0
+                ? hand.combination.ordinal() - this.combination.ordinal()
+                : compareByCombinationValue(hand);
     }
 
     private int compareByCombinationValue(PokerHand hand) {
-        int result = hand.combinationValue - this.combinationValue;
-        if (result == 0) {
-            result = compareNonCombinationCards(hand);
-        }
-        return result;
+        return hand.combinationValue - this.combinationValue != 0
+                ? hand.combinationValue - this.combinationValue
+                : compareNonCombinationCards(hand);
     }
 
     private int compareNonCombinationCards(PokerHand hand) {
@@ -230,8 +226,8 @@ public final class PokerHand implements Comparable<PokerHand> {
         return sb.toString();
     }
 
-    private interface HandValueValidator extends Function<PokerHand, HandValue> {
-        static HandValueValidator isRoyalFlush() {
+    private interface CombinationValidator extends Function<PokerHand, HandValue> {
+        static CombinationValidator isRoyalFlush() {
             return hand -> stream(hand.cards)
                     .allMatch(card -> Objects.equals(card[1], hand.cards[0][1]))
                     && stream(hand.cards)
@@ -239,7 +235,7 @@ public final class PokerHand implements Comparable<PokerHand> {
                     .sum() == 60 ? ROYAL_FLUSH : UNKNOWN;
         }
 
-        static HandValueValidator isStraightFlush() {
+        static CombinationValidator isStraightFlush() {
             return hand -> {
                 boolean isOneKind = stream(hand.getCards())
                         .allMatch(card -> Objects.equals(card[1], hand.getCards()[0][1]));
@@ -258,15 +254,13 @@ public final class PokerHand implements Comparable<PokerHand> {
             };
         }
 
-        static HandValueValidator isFourOfAKind() {
+        static CombinationValidator isFourOfAKind() {
             return hand -> {
                 Map<Integer, Long> map = stream(hand.getCards())
                         .collect(groupingBy(card -> card[0], counting()));
-
                 boolean isFourOfAKind = map.entrySet()
                         .stream()
                         .anyMatch(entry -> entry.getValue() == 4L);
-
                 if (isFourOfAKind) {
                     hand.combinationValue = map.entrySet()
                             .stream()
@@ -275,12 +269,11 @@ public final class PokerHand implements Comparable<PokerHand> {
                             .max()
                             .getAsInt();
                 }
-
                 return isFourOfAKind ? FOUR_OF_A_KIND : UNKNOWN;
             };
         }
 
-        static HandValueValidator isFullHouse() {
+        static CombinationValidator isFullHouse() {
             return hand -> {
                 Map<Integer, Long> map = stream(hand.cards)
                         .collect(groupingBy(card -> card[0], counting()));
@@ -294,7 +287,7 @@ public final class PokerHand implements Comparable<PokerHand> {
             };
         }
 
-        static HandValueValidator isFlush() {
+        static CombinationValidator isFlush() {
             return hand -> {
                 boolean isFlush = stream(hand.cards)
                         .allMatch(card -> Objects.equals(card[1], hand.cards[0][1]));
@@ -305,7 +298,7 @@ public final class PokerHand implements Comparable<PokerHand> {
             };
         }
 
-        static HandValueValidator isStraight() {
+        static CombinationValidator isStraight() {
             return hand -> {
                 int lastCardValue = hand.getCards()[hand.getCards().length - 1][0];
                 int firstCardValue = hand.getCards()[0][0];
@@ -317,14 +310,13 @@ public final class PokerHand implements Comparable<PokerHand> {
             };
         }
 
-        static HandValueValidator isThreeOfAKind() {
+        static CombinationValidator isThreeOfAKind() {
             return hand -> {
                 Map<Integer, Long> map = stream(hand.cards)
                         .collect(groupingBy(card -> card[0], counting()));
                 boolean isThreeOfAKind = map.entrySet()
                         .stream()
                         .anyMatch(entry -> entry.getValue() == 3);
-
                 if (isThreeOfAKind) {
                     hand.combinationValue = map.entrySet()
                             .stream()
@@ -332,7 +324,6 @@ public final class PokerHand implements Comparable<PokerHand> {
                             .mapToInt(Map.Entry::getKey)
                             .max()
                             .getAsInt();
-
                     map.entrySet()
                             .stream()
                             .filter(entry -> entry.getValue() != 3)
@@ -343,7 +334,7 @@ public final class PokerHand implements Comparable<PokerHand> {
             };
         }
 
-        static HandValueValidator isTwoPair() {
+        static CombinationValidator isTwoPair() {
             return hand -> {
                 Map<Integer, Long> map = stream(hand.getCards())
                         .collect(groupingBy(card -> card[0], counting()));
@@ -352,7 +343,6 @@ public final class PokerHand implements Comparable<PokerHand> {
                         .filter(entry -> entry.getValue() == 2L)
                         .count();
                 boolean isTwoPair = counter == 2;
-
                 if (isTwoPair) {
                     hand.combinationValue = map.entrySet()
                             .stream()
@@ -360,7 +350,6 @@ public final class PokerHand implements Comparable<PokerHand> {
                             .mapToInt(Map.Entry::getKey)
                             .max()
                             .getAsInt();
-
                     map.entrySet()
                             .stream()
                             .filter(entry -> entry.getValue() != 2)
@@ -371,7 +360,7 @@ public final class PokerHand implements Comparable<PokerHand> {
             };
         }
 
-        static HandValueValidator isOnePair() {
+        static CombinationValidator isOnePair() {
             return hand -> {
                 Map<Integer, Long> map = stream(hand.cards)
                         .collect(Collectors.groupingBy(card -> card[0], Collectors.counting()));
@@ -383,7 +372,6 @@ public final class PokerHand implements Comparable<PokerHand> {
                             .mapToInt(Map.Entry::getKey)
                             .max()
                             .getAsInt();
-
                     map.entrySet()
                             .stream()
                             .filter(entry -> entry.getValue() != 2)
@@ -394,7 +382,7 @@ public final class PokerHand implements Comparable<PokerHand> {
             };
         }
 
-        static HandValueValidator highCard() {
+        static CombinationValidator highCard() {
             return hand -> {
                 hand.combinationValue = stream(hand.getCards()).mapToInt(card -> card[0])
                         .max()
@@ -404,7 +392,7 @@ public final class PokerHand implements Comparable<PokerHand> {
 
         }
 
-        default HandValueValidator or(HandValueValidator other) {
+        default CombinationValidator or(CombinationValidator other) {
             return hand -> {
                 HandValue value = this.apply(hand);
                 return value.equals(UNKNOWN) ? other.apply(hand) : value;
