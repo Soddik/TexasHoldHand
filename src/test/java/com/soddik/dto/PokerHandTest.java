@@ -159,6 +159,7 @@ class PokerHandTest {
         hands.add(royalFlush);
         hands.add(royalFlushHigher);
 
+        Assertions.assertNotEquals(UNKNOWN, royalFlush.getCombination());
         Assertions.assertEquals(ROYAL_FLUSH, royalFlush.getCombination());
         Assertions.assertEquals(ROYAL_FLUSH, royalFlushHigher.getCombination());
         Assertions.assertEquals(royalFlush.getCombinationValue(), royalFlushHigher.getCombinationValue());
@@ -172,6 +173,7 @@ class PokerHandTest {
         hands.add(straightFlush);
         hands.add(straightFlushLower);
 
+        Assertions.assertNotEquals(UNKNOWN, straightFlush.getCombination());
         Assertions.assertEquals(STRAIGHT_FLUSH, straightFlush.getCombination());
         Assertions.assertNotEquals(HIGH_CARD, straightFlushLower.getCombination());
         Assertions.assertTrue(straightFlush.getCombinationValue() > straightFlushLower.getCombinationValue());
@@ -185,6 +187,7 @@ class PokerHandTest {
         hands.add(four);
         hands.add(fourHigher);
 
+        Assertions.assertNotEquals(UNKNOWN, four.getCombination());
         Assertions.assertEquals(FOUR_OF_A_KIND, four.getCombination());
         Assertions.assertNotEquals(HIGH_CARD, fourHigher.getCombination());
         Assertions.assertTrue(four.getCombinationValue() < fourHigher.getCombinationValue());
@@ -198,6 +201,7 @@ class PokerHandTest {
         hands.add(fullHouse);
         hands.add(fullHouseHigher);
 
+        Assertions.assertNotEquals(UNKNOWN, fullHouse.getCombination());
         Assertions.assertEquals(FULL_HOUSE, fullHouse.getCombination());
         Assertions.assertNotEquals(HIGH_CARD, fullHouseHigher.getCombination());
         Assertions.assertTrue(fullHouse.getCombinationValue() < fullHouseHigher.getCombinationValue());
@@ -211,6 +215,7 @@ class PokerHandTest {
         hands.add(flush);
         hands.add(flushHigher);
 
+        Assertions.assertNotEquals(UNKNOWN, flush.getCombination());
         Assertions.assertEquals(FLUSH, flush.getCombination());
         Assertions.assertNotEquals(HIGH_CARD, flushHigher.getCombination());
         Assertions.assertTrue(flush.getCombinationValue() < flushHigher.getCombinationValue());
@@ -224,6 +229,7 @@ class PokerHandTest {
         hands.add(straight);
         hands.add(straightHigher);
 
+        Assertions.assertNotEquals(UNKNOWN, straight.getCombination());
         Assertions.assertEquals(STRAIGHT, straight.getCombination());
         Assertions.assertNotEquals(HIGH_CARD, straightHigher.getCombination());
         Assertions.assertTrue(straight.getCombinationValue() < straightHigher.getCombinationValue());
@@ -237,6 +243,7 @@ class PokerHandTest {
         hands.add(three);
         hands.add(threeHigh);
 
+        Assertions.assertNotEquals(UNKNOWN, three.getCombination());
         Assertions.assertEquals(THREE_OF_A_KIND, three.getCombination());
         Assertions.assertNotEquals(HIGH_CARD, threeHigh.getCombination());
         Assertions.assertEquals(1, three.compareTo(threeHigh));
@@ -252,6 +259,7 @@ class PokerHandTest {
         hands.add(twoAvg);
         hands.add(twoHigh);
 
+        Assertions.assertNotEquals(UNKNOWN, two.getCombination());
         Assertions.assertEquals(TWO_PAIRS, two.getCombination());
         Assertions.assertNotEquals(HIGH_CARD, twoAvg.getCombination());
         Assertions.assertTrue(two.getCombinationValue() < twoAvg.getCombinationValue());
@@ -266,6 +274,7 @@ class PokerHandTest {
         hands.add(pair);
         hands.add(pairHigh);
 
+        Assertions.assertNotEquals(UNKNOWN, pair.getCombination());
         Assertions.assertEquals(PAIR, pairHigh.getCombination());
         Assertions.assertNotEquals(HIGH_CARD, pair.getCombination());
         Assertions.assertEquals(1, pair.compareTo(pairHigh));
@@ -279,6 +288,7 @@ class PokerHandTest {
         hands.add(high);
         hands.add(lowerHigh);
 
+        Assertions.assertNotEquals(UNKNOWN, high.getCombination());
         Assertions.assertEquals(HIGH_CARD, high.getCombination());
         Assertions.assertNotEquals(UNKNOWN, lowerHigh.getCombination());
         Assertions.assertTrue(high.getCombinationValue() > lowerHigh.getCombinationValue());
