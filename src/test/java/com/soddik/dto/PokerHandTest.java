@@ -4,7 +4,7 @@ import com.soddik.exception.CardAttributeException;
 import com.soddik.exception.CardAttributeException.UnexpectedCardAttributeKindException;
 import com.soddik.exception.CardAttributeException.UnexpectedCardAttributeValueException;
 import com.soddik.exception.HandCardAmountException;
-import com.soddik.exception.UniqueCardException;
+import com.soddik.exception.HandCardAmountException.UniqueCardException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

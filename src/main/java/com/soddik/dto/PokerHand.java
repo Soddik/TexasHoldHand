@@ -2,7 +2,6 @@ package com.soddik.dto;
 
 import com.soddik.exception.CardAttributeException;
 import com.soddik.exception.HandCardAmountException;
-import com.soddik.exception.UniqueCardException;
 
 import java.util.*;
 import java.util.function.Function;
@@ -10,6 +9,7 @@ import java.util.stream.Collectors;
 
 import static com.soddik.dto.PokerHand.HandValue.*;
 import static com.soddik.exception.CardAttributeException.*;
+import static com.soddik.exception.HandCardAmountException.*;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.groupingBy;
