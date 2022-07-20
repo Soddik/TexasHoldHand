@@ -249,16 +249,12 @@ public final class PokerHand implements Comparable<PokerHand> {
             return hand -> {
                 Map<Integer, Long> map = stream(hand.getCards())
                         .collect(groupingBy(card -> card[0], counting()));
+                long limit = 4;
                 boolean isFourOfAKind = map.entrySet()
                         .stream()
-                        .anyMatch(entry -> entry.getValue() == 4L);
+                        .anyMatch(entry -> entry.getValue() == limit);
                 if (isFourOfAKind) {
-                    hand.combinationValue = map.entrySet()
-                            .stream()
-                            .filter(entry -> entry.getValue() == 4L)
-                            .mapToInt(Map.Entry::getKey)
-                            .max()
-                            .getAsInt();
+                    setCombinationValue(hand, map, limit);
                 }
                 return isFourOfAKind ? FOUR_OF_A_KIND : UNKNOWN;
             };
@@ -329,18 +325,21 @@ public final class PokerHand implements Comparable<PokerHand> {
         }
 
         static void addNonCombinationCardAndSetValue(PokerHand hand, Map<Integer, Long> map, long limit) {
+            setCombinationValue(hand, map, limit);
+            map.entrySet()
+                    .stream()
+                    .filter(entry -> entry.getValue() != limit)
+                    .mapToInt(Map.Entry::getKey)
+                    .forEach(hand::addNonCombinationCard);
+        }
+
+        static void setCombinationValue(PokerHand hand, Map<Integer, Long> map, long limit) {
             hand.combinationValue = map.entrySet()
                     .stream()
                     .filter(entry -> entry.getValue() == limit)
                     .mapToInt(Map.Entry::getKey)
                     .max()
                     .getAsInt();
-
-            map.entrySet()
-                    .stream()
-                    .filter(entry -> entry.getValue() != limit)
-                    .mapToInt(Map.Entry::getKey)
-                    .forEach(hand::addNonCombinationCard);
         }
 
         default CombinationValidator or(CombinationValidator other) {
