@@ -5,11 +5,11 @@ import com.soddik.exception.HandCardAmountException;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static com.soddik.dto.PokerHand.HandValue.*;
-import static com.soddik.exception.CardAttributeException.*;
-import static com.soddik.exception.HandCardAmountException.*;
+import static com.soddik.exception.CardAttributeException.UnexpectedCardAttributeKindException;
+import static com.soddik.exception.CardAttributeException.UnexpectedCardAttributeValueException;
+import static com.soddik.exception.HandCardAmountException.UniqueCardException;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.groupingBy;
@@ -24,15 +24,11 @@ public final class PokerHand implements Comparable<PokerHand> {
     public PokerHand(String hand) {
         parseString(hand);
         this.combination = CombinationValidator
-                .isRoyalFlush()
-                .or(CombinationValidator.isStraightFlush())
+                .isStraightOrFlush()
                 .or(CombinationValidator.isFourOfAKind())
                 .or(CombinationValidator.isFullHouse())
-                .or(CombinationValidator.isFlush())
-                .or(CombinationValidator.isStraight())
                 .or(CombinationValidator.isThreeOfAKind())
-                .or(CombinationValidator.isTwoPair())
-                .or(CombinationValidator.isOnePair())
+                .or(CombinationValidator.isPairs())
                 .or(CombinationValidator.highCard())
                 .apply(this);
     }
@@ -227,30 +223,25 @@ public final class PokerHand implements Comparable<PokerHand> {
     }
 
     private interface CombinationValidator extends Function<PokerHand, HandValue> {
-        static CombinationValidator isRoyalFlush() {
-            return hand -> stream(hand.cards)
-                    .allMatch(card -> Objects.equals(card[1], hand.cards[0][1]))
-                    && stream(hand.cards)
-                    .mapToInt(card -> card[0])
-                    .sum() == 60 ? ROYAL_FLUSH : UNKNOWN;
-        }
-
-        static CombinationValidator isStraightFlush() {
+        static CombinationValidator isStraightOrFlush() {
             return hand -> {
-                boolean isOneKind = stream(hand.getCards())
-                        .allMatch(card -> Objects.equals(card[1], hand.getCards()[0][1]));
-                if (isOneKind) {
-                    int lastCardValue = hand.cards[hand.cards.length - 1][0];
-                    int firstCardValue = hand.cards[0][0];
-                    if (lastCardValue - firstCardValue < 5) {
-                        hand.combinationValue = lastCardValue;
-                        return STRAIGHT_FLUSH;
-                    } else {
-                        return UNKNOWN;
-                    }
-                } else {
-                    return UNKNOWN;
+                boolean isOneKind = stream(hand.cards)
+                        .allMatch(card -> Objects.equals(card[1], hand.cards[0][1]));
+                boolean isStraight = hand.cards[hand.cards.length - 1][0] - hand.cards[0][0] < 5;
+
+                if (isOneKind && isStraight) {
+                    hand.combinationValue = hand.cards[hand.cards.length - 1][0];
+                    return stream(hand.cards)
+                            .mapToInt(card -> card[0])
+                            .sum() == 60 ? ROYAL_FLUSH : STRAIGHT_FLUSH;
+                } else if (isOneKind) {
+                    hand.combinationValue = stream(hand.cards).mapToInt(card -> card[0]).sum();
+                    return FLUSH;
+                } else if (isStraight) {
+                    hand.combinationValue = hand.cards[hand.cards.length - 1][0];
+                    return STRAIGHT;
                 }
+                return UNKNOWN;
             };
         }
 
@@ -287,98 +278,44 @@ public final class PokerHand implements Comparable<PokerHand> {
             };
         }
 
-        static CombinationValidator isFlush() {
-            return hand -> {
-                boolean isFlush = stream(hand.cards)
-                        .allMatch(card -> Objects.equals(card[1], hand.cards[0][1]));
-                if (isFlush) {
-                    hand.combinationValue = stream(hand.cards).mapToInt(card -> card[0]).sum();
-                }
-                return isFlush ? FLUSH : UNKNOWN;
-            };
-        }
-
-        static CombinationValidator isStraight() {
-            return hand -> {
-                int lastCardValue = hand.getCards()[hand.getCards().length - 1][0];
-                int firstCardValue = hand.getCards()[0][0];
-                boolean isStraight = lastCardValue - firstCardValue < 5;
-                if (isStraight) {
-                    hand.combinationValue = lastCardValue;
-                }
-                return isStraight ? STRAIGHT : UNKNOWN;
-            };
-        }
-
         static CombinationValidator isThreeOfAKind() {
             return hand -> {
                 Map<Integer, Long> map = stream(hand.cards)
                         .collect(groupingBy(card -> card[0], counting()));
+                long limit = 3;
                 boolean isThreeOfAKind = map.entrySet()
                         .stream()
-                        .anyMatch(entry -> entry.getValue() == 3);
+                        .anyMatch(entry -> entry.getValue() == limit);
                 if (isThreeOfAKind) {
-                    hand.combinationValue = map.entrySet()
-                            .stream()
-                            .filter(entry -> entry.getValue() == 3)
-                            .mapToInt(Map.Entry::getKey)
-                            .max()
-                            .getAsInt();
-                    map.entrySet()
-                            .stream()
-                            .filter(entry -> entry.getValue() != 3)
-                            .mapToInt(Map.Entry::getKey)
-                            .forEach(hand::addNonCombinationCard);
+                    addNonCombinationCardAndSetValue(hand, map, limit);
                 }
                 return isThreeOfAKind ? THREE_OF_A_KIND : UNKNOWN;
             };
         }
 
-        static CombinationValidator isTwoPair() {
+        static CombinationValidator isPairs() {
             return hand -> {
                 Map<Integer, Long> map = stream(hand.getCards())
                         .collect(groupingBy(card -> card[0], counting()));
+                long limit = 2;
                 int counter = (int) map.entrySet()
                         .stream()
-                        .filter(entry -> entry.getValue() == 2L)
+                        .filter(entry -> entry.getValue() == limit)
                         .count();
-                boolean isTwoPair = counter == 2;
-                if (isTwoPair) {
-                    hand.combinationValue = map.entrySet()
-                            .stream()
-                            .filter(entry -> entry.getValue() == 2L)
-                            .mapToInt(Map.Entry::getKey)
-                            .max()
-                            .getAsInt();
-                    map.entrySet()
-                            .stream()
-                            .filter(entry -> entry.getValue() != 2)
-                            .mapToInt(Map.Entry::getKey)
-                            .forEach(hand::addNonCombinationCard);
-                }
-                return isTwoPair ? TWO_PAIRS : UNKNOWN;
-            };
-        }
 
-        static CombinationValidator isOnePair() {
-            return hand -> {
-                Map<Integer, Long> map = stream(hand.cards)
-                        .collect(Collectors.groupingBy(card -> card[0], Collectors.counting()));
-                boolean isPair = map.entrySet().stream().anyMatch(entry -> entry.getValue() > 1);
-                if (isPair) {
-                    hand.combinationValue = map.entrySet()
-                            .stream()
-                            .filter(entry -> entry.getValue() == 2L)
-                            .mapToInt(Map.Entry::getKey)
-                            .max()
-                            .getAsInt();
-                    map.entrySet()
-                            .stream()
-                            .filter(entry -> entry.getValue() != 2)
-                            .mapToInt(Map.Entry::getKey)
-                            .forEach(hand::addNonCombinationCard);
+                switch (counter) {
+                    case 1 -> {
+                        addNonCombinationCardAndSetValue(hand, map, limit);
+                        return PAIR;
+                    }
+                    case 2 -> {
+                        addNonCombinationCardAndSetValue(hand, map, limit);
+                        return TWO_PAIRS;
+                    }
+                    default -> {
+                        return UNKNOWN;
+                    }
                 }
-                return isPair ? PAIR : UNKNOWN;
             };
         }
 
@@ -389,7 +326,21 @@ public final class PokerHand implements Comparable<PokerHand> {
                         .getAsInt();
                 return HIGH_CARD;
             };
+        }
 
+        static void addNonCombinationCardAndSetValue(PokerHand hand, Map<Integer, Long> map, long limit) {
+            hand.combinationValue = map.entrySet()
+                    .stream()
+                    .filter(entry -> entry.getValue() == limit)
+                    .mapToInt(Map.Entry::getKey)
+                    .max()
+                    .getAsInt();
+
+            map.entrySet()
+                    .stream()
+                    .filter(entry -> entry.getValue() != limit)
+                    .mapToInt(Map.Entry::getKey)
+                    .forEach(hand::addNonCombinationCard);
         }
 
         default CombinationValidator or(CombinationValidator other) {
