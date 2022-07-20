@@ -346,8 +346,8 @@ class PokerHandTest {
     }
 
     @Test
-    void stressTest() {
-        System.out.println("START: " + LocalDateTime.now());
+    void stress() {
+        System.out.println("START: " + new Date());
         for (int index = 0; index < 1_000_000; index++) {
             DeckGenerator deckGenerator = new DeckGenerator();
             HandGenerator handGenerator = new HandGenerator(deckGenerator);
@@ -359,6 +359,6 @@ class PokerHandTest {
             hands.sort(PokerHand::compareTo);
         }
 
-        System.out.println("END: " + LocalDateTime.now());
+        System.out.println("END: " + new Date());
     }
 }
