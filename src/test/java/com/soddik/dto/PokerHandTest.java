@@ -1,5 +1,10 @@
 package com.soddik.dto;
 
+import com.soddik.exception.CardAttributeException;
+import com.soddik.exception.CardAttributeException.UnexpectedCardAttributeKindException;
+import com.soddik.exception.CardAttributeException.UnexpectedCardAttributeValueException;
+import com.soddik.exception.HandCardAmountException;
+import com.soddik.exception.UniqueCardException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -274,5 +279,65 @@ class PokerHandTest {
         Assertions.assertEquals(HIGH_CARD, high.getCombination());
         Assertions.assertNotEquals(UNKNOWN, lowerHigh.getCombination());
         Assertions.assertTrue(high.getCombinationValue() > lowerHigh.getCombinationValue());
+    }
+
+    @Test
+    void checkHandCardAmountException() {
+        String msg = "";
+        try {
+            new PokerHand("AC QS TD 3H");
+        } catch (HandCardAmountException e) {
+            msg = e.getMessage();
+        } finally {
+            Assertions.assertEquals("There must be exactly 5 cards in the hand, but there are 4", msg);
+        }
+    }
+
+    @Test
+    void checkCardAttributeException() {
+        String msg = "";
+        try {
+            new PokerHand("21S AS TD 3H 6C");
+        } catch (CardAttributeException e) {
+            msg = e.getMessage();
+        } finally {
+            Assertions.assertEquals("The card should contain 2 attributes, but it contains 3", msg);
+        }
+    }
+
+    @Test
+    void checkUnexpectedCardAttributeValueException() {
+        String msg = "";
+        try {
+            new PokerHand("ZC QS TD 3H 6C");
+        } catch (UnexpectedCardAttributeValueException e) {
+            msg = e.getMessage();
+        } finally {
+            Assertions.assertEquals("Unexpected card value Z", msg);
+        }
+    }
+
+    @Test
+    void checkUnexpectedCardAttributeKindException() {
+        String msg = "";
+        try {
+            new PokerHand("AX QS TD 3H 6C");
+        } catch (UnexpectedCardAttributeKindException e) {
+            msg = e.getMessage();
+        } finally {
+            Assertions.assertEquals("Unexpected card kind X", msg);
+        }
+    }
+
+    @Test
+    void checkUniqueCardException() {
+        String msg = "";
+        try {
+            new PokerHand("AS AS TD 3H 6C");
+        } catch (UniqueCardException e) {
+            msg = e.getMessage();
+        } finally {
+            Assertions.assertEquals("Unique cards must be in hand, but there is a duplicate with value: 14 kind: 20", msg);
+        }
     }
 }
