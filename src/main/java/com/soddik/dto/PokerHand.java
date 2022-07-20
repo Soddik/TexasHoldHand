@@ -123,10 +123,8 @@ public final class PokerHand implements Comparable<PokerHand> {
     private void sortCardsByValue(Integer[][] cards) {
         for (int i = 0; i < cards.length; i++) {
             int pos = i;
-
             int value = cards[i][0];
             int kind = cards[i][1];
-
             for (int j = i + 1; j < cards.length; j++) {
                 if (cards[j][0] < value) {
                     pos = j;
@@ -134,7 +132,6 @@ public final class PokerHand implements Comparable<PokerHand> {
                     kind = cards[j][1];
                 }
             }
-
             cards[pos][0] = cards[i][0];
             cards[pos][1] = cards[i][1];
 
@@ -159,15 +156,13 @@ public final class PokerHand implements Comparable<PokerHand> {
     private int compareByCombinationValue(PokerHand hand) {
         int result = hand.combinationValue - this.combinationValue;
         if (result == 0) {
-            result = calcNonCombinationDiff(hand);
+            result = compareNonCombinationCards(hand);
         }
         return result;
     }
 
-    private int calcNonCombinationDiff(PokerHand hand) {
-        int handMax = getSumOfNonCombinationCards(hand);
-        int thisMax = getSumOfNonCombinationCards(this);
-        return handMax - thisMax;
+    private int compareNonCombinationCards(PokerHand hand) {
+        return getSumOfNonCombinationCards(hand) > getSumOfNonCombinationCards(this) ? 1 : -1;
     }
 
     private int getSumOfNonCombinationCards(PokerHand hand) {
