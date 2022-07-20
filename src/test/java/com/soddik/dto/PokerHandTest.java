@@ -5,12 +5,16 @@ import com.soddik.exception.CardAttributeException.UnexpectedCardAttributeKindEx
 import com.soddik.exception.CardAttributeException.UnexpectedCardAttributeValueException;
 import com.soddik.exception.HandCardAmountException;
 import com.soddik.exception.HandCardAmountException.UniqueCardException;
+import com.soddik.generator.DeckGenerator;
+import com.soddik.generator.HandGenerator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import static com.soddik.dto.PokerHand.HandValue.*;
@@ -339,5 +343,22 @@ class PokerHandTest {
         } finally {
             Assertions.assertEquals("Unique cards must be in hand, but there is a duplicate with value: 14 kind: 20", msg);
         }
+    }
+
+    @Test
+    void stressTest() {
+        System.out.println("START: " + LocalDateTime.now());
+        for (int index = 0; index < 1_000_000; index++) {
+            DeckGenerator deckGenerator = new DeckGenerator();
+            HandGenerator handGenerator = new HandGenerator(deckGenerator);
+            List<PokerHand> hands = new ArrayList<>();
+            for (int i = 0; i < 10; i++) {
+                hands.add(handGenerator.generateHand());
+            }
+            Collections.shuffle(hands);
+            hands.sort(PokerHand::compareTo);
+        }
+
+        System.out.println("END: " + LocalDateTime.now());
     }
 }
