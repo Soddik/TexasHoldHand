@@ -52,7 +52,6 @@ public class PokerHand implements Comparable<PokerHand> {
         nonCombinationCards.add(value);
     }
 
-    // TODO: 20.07.2022 make immutable
     public List<Integer> getNonCombinationCards() {
         return new ArrayList<>(nonCombinationCards);
     }
@@ -174,10 +173,10 @@ public class PokerHand implements Comparable<PokerHand> {
                         default -> throw new UnexpectedCardAttribute(String.format("Unexpected card value %s", value));
                     };
 
-                    if (uniqueCheck(value, kind)) {
-                        cards[index][0] = value;
-                        cards[index][1] = kind;
-                    }
+                    uniqueCheck(value, kind);
+
+                    cards[index][0] = value;
+                    cards[index][1] = kind;
                 } else {
                     throw new CardAttributeException(
                             String.format("The card should contain 2 attributes, but it contains %s", card.length));
@@ -203,7 +202,7 @@ public class PokerHand implements Comparable<PokerHand> {
     }
 
 
-    private boolean uniqueCheck(int value, int kind) {
+    private void uniqueCheck(int value, int kind) {
         for (Integer[] card : cards) {
             if (card[0] != null && card[1] != null) {
                 if (card[0] == value && card[1] == kind) {
@@ -212,7 +211,6 @@ public class PokerHand implements Comparable<PokerHand> {
                 }
             }
         }
-        return true;
     }
 
     private void sortByValue(Integer[][] cards) {
