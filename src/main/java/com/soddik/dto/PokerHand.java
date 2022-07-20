@@ -2,7 +2,6 @@ package com.soddik.dto;
 
 import com.soddik.exception.CardAttributeException;
 import com.soddik.exception.HandCardAmountException;
-import com.soddik.exception.UnexpectedCardAttribute;
 import com.soddik.exception.UniqueCardException;
 
 import java.util.*;
@@ -10,12 +9,13 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.soddik.dto.PokerHand.HandValue.*;
+import static com.soddik.exception.CardAttributeException.*;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.groupingBy;
 
 
-public class PokerHand implements Comparable<PokerHand> {
+public final class PokerHand implements Comparable<PokerHand> {
     private final Integer[][] cards = new Integer[5][2];
     private final List<Integer> nonCombinationCards = new ArrayList<>();
 
@@ -36,8 +36,6 @@ public class PokerHand implements Comparable<PokerHand> {
                 .or(HandValueValidator.isOnePair())
                 .or(HandValueValidator.highCard())
                 .apply(this);
-
-        nonCombinationCards.sort(Integer::compareTo);
     }
 
     public Integer[][] getCards() {
@@ -46,10 +44,6 @@ public class PokerHand implements Comparable<PokerHand> {
 
     public HandValue getCombination() {
         return combination;
-    }
-
-    public void addNonCombinationCard(Integer value) {
-        nonCombinationCards.add(value);
     }
 
     public List<Integer> getNonCombinationCards() {
@@ -96,7 +90,7 @@ public class PokerHand implements Comparable<PokerHand> {
                     case 12 -> "Q";
                     case 11 -> "J";
                     case 10 -> "T";
-                    default -> throw new UnexpectedCardAttribute(String.format("Unexpected card value %s", card[0]));
+                    default -> throw new UnexpectedCardAttributeValueException(String.format("Unexpected card value %s", card[0]));
                 };
 
                 sb.append(strValue);
@@ -107,7 +101,7 @@ public class PokerHand implements Comparable<PokerHand> {
                 case 21 -> "H";
                 case 22 -> "D";
                 case 23 -> "C";
-                default -> throw new UnexpectedCardAttribute(String.format("Unexpected card kind %s", card[0]));
+                default -> throw new UnexpectedCardAttributeKindException(String.format("Unexpected card kind %s", card[0]));
             };
 
             sb.append(kind).append(" ");
@@ -124,6 +118,10 @@ public class PokerHand implements Comparable<PokerHand> {
         }
 
         return result;
+    }
+
+    private void addNonCombinationCard(Integer value) {
+        nonCombinationCards.add(value);
     }
 
     private int deepCombinationCheck(PokerHand hand) {
@@ -170,7 +168,7 @@ public class PokerHand implements Comparable<PokerHand> {
                         case "H" -> 21;
                         case "D" -> 22;
                         case "C" -> 23;
-                        default -> throw new UnexpectedCardAttribute(String.format("Unexpected card value %s", value));
+                        default -> throw new UnexpectedCardAttributeKindException(String.format("Unexpected card kind %s", card[1]));
                     };
 
                     uniqueCheck(value, kind);
@@ -197,8 +195,7 @@ public class PokerHand implements Comparable<PokerHand> {
                 return num;
             }
         }
-
-        throw new UnexpectedCardAttribute(String.format("Unexpected card value %s", value));
+        throw new UnexpectedCardAttributeValueException(String.format("Unexpected card value %s", value));
     }
 
 

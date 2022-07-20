@@ -1,13 +1,14 @@
 package com.soddik.generator;
 
 import com.soddik.dto.PokerHand;
-import com.soddik.exception.UnexpectedCardAttribute;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
+
+import static com.soddik.exception.CardAttributeException.UnexpectedCardAttributeValueException;
 
 public class HandGenerator {
     private final List<String> kinds = List.of("S", "H", "D", "C");
@@ -53,7 +54,7 @@ public class HandGenerator {
                 case 12 -> "Q";
                 case 11 -> "J";
                 case 10 -> "T";
-                default -> throw new UnexpectedCardAttribute(String.format("Unexpected card value %s", value));
+                default -> throw new UnexpectedCardAttributeValueException(String.format("Unexpected card value %s", value));
             };
 
             sb.append(strValue);
