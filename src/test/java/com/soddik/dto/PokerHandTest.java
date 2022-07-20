@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -119,7 +118,7 @@ class PokerHandTest {
 
         Collections.shuffle(hands);
 
-        hands.sort(PokerHand::compareTo);
+        Collections.sort(hands);
 
         Assertions.assertEquals(STRAIGHT_FLUSH, hands.get(0).getCombination());
         Assertions.assertEquals(STRAIGHT_FLUSH, hands.get(1).getCombination());
