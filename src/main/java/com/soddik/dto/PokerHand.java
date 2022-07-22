@@ -6,7 +6,7 @@ import com.soddik.exception.HandCardAmountException;
 import java.util.*;
 import java.util.function.Function;
 
-import static com.soddik.dto.PokerHand.HandValue.*;
+import static com.soddik.dto.PokerHand.Combination.*;
 import static com.soddik.exception.CardAttributeException.UnexpectedCardAttributeKindException;
 import static com.soddik.exception.CardAttributeException.UnexpectedCardAttributeValueException;
 import static com.soddik.exception.HandCardAmountException.UniqueCardException;
@@ -18,7 +18,7 @@ import static java.util.stream.Collectors.groupingBy;
 public final class PokerHand implements Comparable<PokerHand> {
     private final Integer[][] cards = new Integer[5][2];
     private final List<Integer> nonCombinationCards = new ArrayList<>();
-    private final HandValue combination;
+    private final Combination combination;
     private Integer combinationValue = 0;
 
     public PokerHand(String hand) {
@@ -37,7 +37,7 @@ public final class PokerHand implements Comparable<PokerHand> {
         return cards.clone();
     }
 
-    public HandValue getCombination() {
+    public Combination getCombination() {
         return combination;
     }
 
@@ -222,7 +222,7 @@ public final class PokerHand implements Comparable<PokerHand> {
         return sb.toString();
     }
 
-    private interface CombinationValidator extends Function<PokerHand, HandValue> {
+    private interface CombinationValidator extends Function<PokerHand, Combination> {
         static CombinationValidator isStraightOrFlush() {
             return hand -> {
                 boolean isOneKind = stream(hand.cards)
@@ -247,8 +247,7 @@ public final class PokerHand implements Comparable<PokerHand> {
 
         static CombinationValidator isFourOfAKind() {
             return hand -> {
-                Map<Integer, Long> map = stream(hand.getCards())
-                        .collect(groupingBy(card -> card[0], counting()));
+                Map<Integer, Long> map = countKinds(hand);
                 long limit = 4;
                 boolean isFourOfAKind = map.entrySet()
                         .stream()
@@ -262,8 +261,7 @@ public final class PokerHand implements Comparable<PokerHand> {
 
         static CombinationValidator isFullHouse() {
             return hand -> {
-                Map<Integer, Long> map = stream(hand.cards)
-                        .collect(groupingBy(card -> card[0], counting()));
+                Map<Integer, Long> map = countKinds(hand);
                 boolean isFullHouse = map.keySet().size() == 2;
                 if (isFullHouse) {
                     hand.combinationValue = map.keySet().stream()
@@ -276,8 +274,7 @@ public final class PokerHand implements Comparable<PokerHand> {
 
         static CombinationValidator isThreeOfAKind() {
             return hand -> {
-                Map<Integer, Long> map = stream(hand.cards)
-                        .collect(groupingBy(card -> card[0], counting()));
+                Map<Integer, Long> map = countKinds(hand);
                 long limit = 3;
                 boolean isThreeOfAKind = map.entrySet()
                         .stream()
@@ -324,6 +321,11 @@ public final class PokerHand implements Comparable<PokerHand> {
             };
         }
 
+        static Map<Integer, Long> countKinds(PokerHand hand) {
+            return stream(hand.cards)
+                    .collect(groupingBy(card -> card[0], counting()));
+        }
+
         static void addNonCombinationCardAndSetValue(PokerHand hand, Map<Integer, Long> map, long limit) {
             setCombinationValue(hand, map, limit);
             map.entrySet()
@@ -344,13 +346,13 @@ public final class PokerHand implements Comparable<PokerHand> {
 
         default CombinationValidator or(CombinationValidator other) {
             return hand -> {
-                HandValue value = this.apply(hand);
+                Combination value = this.apply(hand);
                 return value.equals(UNKNOWN) ? other.apply(hand) : value;
             };
         }
     }
 
-    public enum HandValue {
+    public enum Combination {
         UNKNOWN,
         HIGH_CARD,
         PAIR,
