@@ -7,17 +7,15 @@ import com.soddik.exception.HandCardAmountException;
 import com.soddik.exception.HandCardAmountException.UniqueCardException;
 import com.soddik.generator.DeckGenerator;
 import com.soddik.generator.HandGenerator;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import static com.soddik.dto.PokerHand.Combination.*;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class PokerHandTest {
     private static List<PokerHand> hands;
 
@@ -27,6 +25,7 @@ class PokerHandTest {
     }
 
     @Test
+    @Order(1)
     void sortAndPrintAll() {
         PokerHand royalFlush = new PokerHand("AC JC KC QC TC");
         PokerHand straightFlush = new PokerHand("9C JC KC QC TC");
@@ -64,10 +63,12 @@ class PokerHandTest {
         Assertions.assertEquals(TWO_PAIRS, hands.get(7).getCombination());
         Assertions.assertEquals(PAIR, hands.get(8).getCombination());
         Assertions.assertEquals(HIGH_CARD, hands.get(9).getCombination());
+        System.out.println("====sortAndPrintAll====");
         hands.forEach(System.out::println);
     }
 
     @Test
+    @Order(2)
     void sortAllWithDuplicates() {
         PokerHand straightFlush = new PokerHand("9C JC KC QC TC");
         PokerHand straightFlush1 = new PokerHand("9S JS 8S QS TS");
@@ -148,10 +149,13 @@ class PokerHandTest {
 
         Assertions.assertEquals(HIGH_CARD, hands.get(17).getCombination());
         Assertions.assertEquals(HIGH_CARD, hands.get(18).getCombination());
+        System.out.println("====sortAndPrintAll====");
+        hands.forEach(System.out::println);
     }
 
 
     @Test
+    @Order(3)
     void checkRoyalFlush() {
         PokerHand royalFlush = new PokerHand("AC JC KC QC TC");
         PokerHand royalFlushHigher = new PokerHand("AS JS KS QS TS");
@@ -166,6 +170,7 @@ class PokerHandTest {
     }
 
     @Test
+    @Order(4)
     void checkStraightFlush() {
         PokerHand straightFlush = new PokerHand("9C JC KC QC TC");
         PokerHand straightFlushLower = new PokerHand("9S JS 8S QS TS");
@@ -180,6 +185,7 @@ class PokerHandTest {
     }
 
     @Test
+    @Order(5)
     void checkFour() {
         PokerHand four = new PokerHand("JC JS JD JH 6C");//+
         PokerHand fourHigher = new PokerHand("QC QS QD QH 7C");//+
@@ -194,6 +200,7 @@ class PokerHandTest {
     }
 
     @Test
+    @Order(6)
     void checkFullHouse() {
         PokerHand fullHouse = new PokerHand("JC JS JD 6H 6C");
         PokerHand fullHouseHigher = new PokerHand("QC QS QD 7H 7C");
@@ -208,6 +215,7 @@ class PokerHandTest {
     }
 
     @Test
+    @Order(7)
     void checkFlush() {
         PokerHand flush = new PokerHand("AC 2C KC QC TC");
         PokerHand flushHigher = new PokerHand("AS 3S KS QS TS");
@@ -222,6 +230,7 @@ class PokerHandTest {
     }
 
     @Test
+    @Order(8)
     void checkStraight() {
         PokerHand straight = new PokerHand("3S 2C 4H 5C 6D");
         PokerHand straightHigher = new PokerHand("3S 4C 5C 6S 7S");
@@ -236,6 +245,7 @@ class PokerHandTest {
     }
 
     @Test
+    @Order(9)
     void checkThree() {
         PokerHand three = new PokerHand("JC JS JD 3H 6C");
         PokerHand threeHigh = new PokerHand("JC JS JD 3H 7C");
@@ -250,6 +260,7 @@ class PokerHandTest {
     }
 
     @Test
+    @Order(10)
     void checkTwoPair() {
         PokerHand two = new PokerHand("JC JS 3D 3H 6C");
         PokerHand twoAvg = new PokerHand("QC QS 4D 4H 6C");
@@ -267,6 +278,7 @@ class PokerHandTest {
     }
 
     @Test
+    @Order(11)
     void checkPair() {
         PokerHand pair = new PokerHand("JC JS 4D 2H 6C");
         PokerHand pairHigh = new PokerHand("JC JS 4D 3H 6C");
@@ -281,6 +293,7 @@ class PokerHandTest {
     }
 
     @Test
+    @Order(12)
     void checkHigh() {
         PokerHand high = new PokerHand("AC QS TD 3H 6C");
         PokerHand lowerHigh = new PokerHand("KC QC TS 4H 5C");
@@ -295,6 +308,7 @@ class PokerHandTest {
     }
 
     @Test
+    @Order(13)
     void checkHandCardAmountException() {
         String msg = "";
         try {
@@ -307,6 +321,7 @@ class PokerHandTest {
     }
 
     @Test
+    @Order(14)
     void checkCardAttributeException() {
         String msg = "";
         try {
@@ -319,6 +334,7 @@ class PokerHandTest {
     }
 
     @Test
+    @Order(15)
     void checkUnexpectedCardAttributeValueException() {
         String msg = "";
         try {
@@ -331,6 +347,7 @@ class PokerHandTest {
     }
 
     @Test
+    @Order(16)
     void checkUnexpectedCardAttributeKindException() {
         String msg = "";
         try {
@@ -343,6 +360,7 @@ class PokerHandTest {
     }
 
     @Test
+    @Order(17)
     void checkUniqueCardException() {
         String msg = "";
         try {
@@ -355,8 +373,8 @@ class PokerHandTest {
     }
 
     @Test
+    @Order(18)
     void stress() {
-        System.out.println("START: " + new Date());
         for (int index = 0; index < 1_000_000; index++) {
             DeckGenerator deckGenerator = new DeckGenerator();
             HandGenerator handGenerator = new HandGenerator(deckGenerator);
@@ -367,7 +385,5 @@ class PokerHandTest {
             Collections.shuffle(hands);
             hands.sort(PokerHand::compareTo);
         }
-
-        System.out.println("END: " + new Date());
     }
 }
