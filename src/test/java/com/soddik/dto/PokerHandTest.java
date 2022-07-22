@@ -16,7 +16,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import static com.soddik.dto.PokerHand.HandValue.*;
+import static com.soddik.dto.PokerHand.Combination.*;
 
 class PokerHandTest {
     private static List<PokerHand> hands;
