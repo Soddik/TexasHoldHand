@@ -50,8 +50,6 @@ class PokerHandTest {
         hands.add(high);
 
         Collections.shuffle(hands);
-        System.out.println("====Shuffle====");
-        hands.forEach(System.out::println);
 
         hands.sort(PokerHand::compareTo);
 
@@ -75,24 +73,24 @@ class PokerHandTest {
         PokerHand royalFlush = new PokerHand("AC JC KC QC TC");
         PokerHand straightFlush = new PokerHand("9C JC KC QC TC");
         PokerHand straightFlush1 = new PokerHand("9S JS 8S QS TS");
-        PokerHand four = new PokerHand("JC JS JD JH 6C");
+        PokerHand four = new PokerHand("JC JS JD JH AC");
         PokerHand four1 = new PokerHand("QC QS QD QH 7C");
-        PokerHand fullHouse = new PokerHand("JC JS JD 7H 7C");
-        PokerHand fullHouse1 = new PokerHand("QC QS QD 6H 6C");
-        PokerHand flush = new PokerHand("AC 2C KC QC TC");
-        PokerHand flush1 = new PokerHand("AS 3S KS QS TS");
+        PokerHand fullHouse = new PokerHand("JC JS JD AH AC");
+        PokerHand fullHouse1 = new PokerHand("QC QS QD 2H 2C");
+        PokerHand flush = new PokerHand("2C 3C 9C JC KC");
+        PokerHand flush1 = new PokerHand("5S 6S 7S JS KS");
         PokerHand straight = new PokerHand("3S 2C 4H 5C 6D");
         PokerHand straight1 = new PokerHand("3S 4C 5C 6S 7S");
-        PokerHand three = new PokerHand("JC JS JD 3H 6C");
-        PokerHand three2 = new PokerHand("JC JS JD 2H 7C");
+        PokerHand three = new PokerHand("JC JS JD 3H 9C");
+        PokerHand three2 = new PokerHand("QC QS QD 2H 7C");
         PokerHand two = new PokerHand("JC JS 4D 4H 6C");
         PokerHand two1 = new PokerHand("QC QS 4D 4H 6C");
         PokerHand two2 = new PokerHand("QD QH 4S 4C 7C");
-        PokerHand two3 = new PokerHand("3C 3S 6D 6H 4C");
-        PokerHand two4 = new PokerHand("6D 6H 2S 2C 5C");
+        PokerHand two3 = new PokerHand("3C 3S TD TH 4C");
+        PokerHand two4 = new PokerHand("TD TH 2S 2C 9C");
         PokerHand pair = new PokerHand("JC JS 4D 3H 6C");
         PokerHand pair2 = new PokerHand("KC KS 4D 2H 6C");
-        PokerHand pair3 = new PokerHand("7C 7S 2D 3H 6C");
+        PokerHand pair3 = new PokerHand("7C 7S 2D 3H 5C");
         PokerHand pair4 = new PokerHand("7C 7S 4D 3H 5C");
         PokerHand high = new PokerHand("AC QS TD 3H 6C");
         PokerHand high1 = new PokerHand("KC QC TS 4H 5C");
@@ -200,7 +198,7 @@ class PokerHandTest {
         Assertions.assertNotEquals(UNKNOWN, straightFlush.getCombination());
         Assertions.assertEquals(STRAIGHT_FLUSH, straightFlush.getCombination());
         Assertions.assertNotEquals(HIGH_CARD, straightFlushLower.getCombination());
-        Assertions.assertTrue(straightFlush.getCombinationValue() > straightFlushLower.getCombinationValue());
+        Assertions.assertEquals(1, straightFlushLower.compareTo(straightFlush));
     }
 
     @Test
@@ -236,16 +234,19 @@ class PokerHandTest {
     @Test
     @Order(7)
     void checkFlush() {
-        PokerHand flush = new PokerHand("AC 2C KC QC TC");
-        PokerHand flushHigher = new PokerHand("AS 3S KS QS TS");
+        PokerHand flush = new PokerHand("5S 6S 7S JS KS");
+        PokerHand flushHigher = new PokerHand("2C 3C 9C JC KC");
 
         hands.add(flush);
         hands.add(flushHigher);
 
+        Collections.sort(hands);
+        hands.forEach(System.out::println);
+
         Assertions.assertNotEquals(UNKNOWN, flush.getCombination());
         Assertions.assertEquals(FLUSH, flush.getCombination());
         Assertions.assertNotEquals(HIGH_CARD, flushHigher.getCombination());
-        Assertions.assertTrue(flush.getCombinationValue() < flushHigher.getCombinationValue());
+        Assertions.assertEquals(1, flush.compareTo(flushHigher));
     }
 
     @Test
@@ -267,7 +268,7 @@ class PokerHandTest {
     @Order(9)
     void checkThree() {
         PokerHand three = new PokerHand("JC JS JD 3H 6C");
-        PokerHand threeHigh = new PokerHand("JC JS JD 3H 7C");
+        PokerHand threeHigh = new PokerHand("QC QS QD 3H 7C");
 
         hands.add(three);
         hands.add(threeHigh);
@@ -275,25 +276,28 @@ class PokerHandTest {
         Assertions.assertNotEquals(UNKNOWN, three.getCombination());
         Assertions.assertEquals(THREE_OF_A_KIND, three.getCombination());
         Assertions.assertNotEquals(HIGH_CARD, threeHigh.getCombination());
-        Assertions.assertEquals(-1, threeHigh.compareTo(three));
+        Assertions.assertEquals(1, three.compareTo(threeHigh));
     }
 
     @Test
     @Order(10)
     void checkTwoPair() {
         PokerHand two = new PokerHand("JC JS 3D 3H 6C");
-        PokerHand twoAvg = new PokerHand("QC QS 4D 4H 6C");
-        PokerHand twoHigh = new PokerHand("QD QH 4S 4C 7C");
+        PokerHand twoHigh = new PokerHand("QC QS 4D 4H 6C");
+        PokerHand twoAvg = new PokerHand("2S 2C 9C TH TD");
+        PokerHand two1 = new PokerHand("3C 3S 4C TH TD");
 
         hands.add(two);
         hands.add(twoAvg);
         hands.add(twoHigh);
+        hands.add(two1);
+
 
         Assertions.assertNotEquals(UNKNOWN, two.getCombination());
         Assertions.assertEquals(TWO_PAIRS, two.getCombination());
         Assertions.assertNotEquals(HIGH_CARD, twoAvg.getCombination());
-        Assertions.assertTrue(two.getCombinationValue() < twoAvg.getCombinationValue());
-        Assertions.assertEquals(-1, twoHigh.compareTo(twoAvg));
+        Assertions.assertTrue(two.getCombinationValue() < twoHigh.getCombinationValue());
+        Assertions.assertEquals(1, twoAvg.compareTo(twoHigh));
     }
 
     @Test
@@ -305,13 +309,10 @@ class PokerHandTest {
         hands.add(pair);
         hands.add(pairHigh);
 
-        Collections.sort(hands);
-        hands.forEach(System.out::println);
-
         Assertions.assertNotEquals(UNKNOWN, pair.getCombination());
         Assertions.assertEquals(PAIR, pairHigh.getCombination());
         Assertions.assertNotEquals(HIGH_CARD, pair.getCombination());
-        Assertions.assertEquals(-1, pairHigh.compareTo(pair));
+        Assertions.assertEquals(1, pair.compareTo(pairHigh));
     }
 
     @Test
@@ -396,16 +397,14 @@ class PokerHandTest {
 
     @Test
     @Order(18)
-    void stress() {
-        for (int index = 0; index < 1_000_000; index++) {
-            DeckGenerator deckGenerator = new DeckGenerator();
-            HandGenerator handGenerator = new HandGenerator(deckGenerator);
-            List<PokerHand> hands = new ArrayList<>();
-            for (int i = 0; i < 10; i++) {
-                hands.add(handGenerator.generateHand());
-            }
-            Collections.shuffle(hands);
-            hands.sort(PokerHand::compareTo);
+    void checkNPE(){
+        String msg = "";
+        try {
+            new PokerHand(null);
+        } catch (NullPointerException e) {
+            msg = e.getMessage();
+        } finally {
+            Assertions.assertEquals("Entry string cannot be null", msg);
         }
     }
 }
