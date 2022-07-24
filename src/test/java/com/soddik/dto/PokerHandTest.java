@@ -50,6 +50,8 @@ class PokerHandTest {
         hands.add(high);
 
         Collections.shuffle(hands);
+        System.out.println("====Shuffle====");
+        hands.forEach(System.out::println);
 
         hands.sort(PokerHand::compareTo);
 
@@ -63,32 +65,39 @@ class PokerHandTest {
         Assertions.assertEquals(TWO_PAIRS, hands.get(7).getCombination());
         Assertions.assertEquals(PAIR, hands.get(8).getCombination());
         Assertions.assertEquals(HIGH_CARD, hands.get(9).getCombination());
-        System.out.println("====sortAndPrintAll====");
+        System.out.println("====Sorted====");
         hands.forEach(System.out::println);
     }
 
     @Test
     @Order(2)
     void sortAllWithDuplicates() {
+        PokerHand royalFlush = new PokerHand("AC JC KC QC TC");
         PokerHand straightFlush = new PokerHand("9C JC KC QC TC");
         PokerHand straightFlush1 = new PokerHand("9S JS 8S QS TS");
         PokerHand four = new PokerHand("JC JS JD JH 6C");
         PokerHand four1 = new PokerHand("QC QS QD QH 7C");
-        PokerHand fullHouse = new PokerHand("JC JS JD 6H 6C");
-        PokerHand fullHouse1 = new PokerHand("QC QS QD 7H 7C");
+        PokerHand fullHouse = new PokerHand("JC JS JD 7H 7C");
+        PokerHand fullHouse1 = new PokerHand("QC QS QD 6H 6C");
         PokerHand flush = new PokerHand("AC 2C KC QC TC");
         PokerHand flush1 = new PokerHand("AS 3S KS QS TS");
         PokerHand straight = new PokerHand("3S 2C 4H 5C 6D");
         PokerHand straight1 = new PokerHand("3S 4C 5C 6S 7S");
         PokerHand three = new PokerHand("JC JS JD 3H 6C");
-        PokerHand three2 = new PokerHand("JC JS JD 3H 7C");
-        PokerHand two = new PokerHand("JC JS 3D 3H 6C");
+        PokerHand three2 = new PokerHand("JC JS JD 2H 7C");
+        PokerHand two = new PokerHand("JC JS 4D 4H 6C");
         PokerHand two1 = new PokerHand("QC QS 4D 4H 6C");
         PokerHand two2 = new PokerHand("QD QH 4S 4C 7C");
+        PokerHand two3 = new PokerHand("3C 3S 6D 6H 4C");
+        PokerHand two4 = new PokerHand("6D 6H 2S 2C 5C");
         PokerHand pair = new PokerHand("JC JS 4D 3H 6C");
-        PokerHand pair2 = new PokerHand("JC JS 5D 2H 6C");
+        PokerHand pair2 = new PokerHand("KC KS 4D 2H 6C");
+        PokerHand pair3 = new PokerHand("7C 7S 2D 3H 6C");
+        PokerHand pair4 = new PokerHand("7C 7S 4D 3H 5C");
         PokerHand high = new PokerHand("AC QS TD 3H 6C");
         PokerHand high1 = new PokerHand("KC QC TS 4H 5C");
+
+        hands.add(royalFlush);
 
         hands.add(straightFlush);
         hands.add(straightFlush1);
@@ -111,9 +120,14 @@ class PokerHandTest {
         hands.add(two);
         hands.add(two1);
         hands.add(two2);
+        hands.add(two3);
+        hands.add(two4);
 
         hands.add(pair);
         hands.add(pair2);
+        hands.add(pair3);
+        hands.add(pair4);
+
         hands.add(high);
         hands.add(high1);
 
@@ -121,35 +135,40 @@ class PokerHandTest {
 
         Collections.sort(hands);
 
-        Assertions.assertEquals(STRAIGHT_FLUSH, hands.get(0).getCombination());
+        Assertions.assertEquals(ROYAL_FLUSH, hands.get(0).getCombination());
+
         Assertions.assertEquals(STRAIGHT_FLUSH, hands.get(1).getCombination());
+        Assertions.assertEquals(STRAIGHT_FLUSH, hands.get(2).getCombination());
 
-
-        Assertions.assertEquals(FOUR_OF_A_KIND, hands.get(2).getCombination());
         Assertions.assertEquals(FOUR_OF_A_KIND, hands.get(3).getCombination());
+        Assertions.assertEquals(FOUR_OF_A_KIND, hands.get(4).getCombination());
 
-        Assertions.assertEquals(FULL_HOUSE, hands.get(4).getCombination());
         Assertions.assertEquals(FULL_HOUSE, hands.get(5).getCombination());
+        Assertions.assertEquals(FULL_HOUSE, hands.get(6).getCombination());
 
-        Assertions.assertEquals(FLUSH, hands.get(6).getCombination());
         Assertions.assertEquals(FLUSH, hands.get(7).getCombination());
+        Assertions.assertEquals(FLUSH, hands.get(8).getCombination());
 
-        Assertions.assertEquals(STRAIGHT, hands.get(8).getCombination());
         Assertions.assertEquals(STRAIGHT, hands.get(9).getCombination());
+        Assertions.assertEquals(STRAIGHT, hands.get(10).getCombination());
 
-        Assertions.assertEquals(THREE_OF_A_KIND, hands.get(10).getCombination());
         Assertions.assertEquals(THREE_OF_A_KIND, hands.get(11).getCombination());
+        Assertions.assertEquals(THREE_OF_A_KIND, hands.get(12).getCombination());
 
-        Assertions.assertEquals(TWO_PAIRS, hands.get(12).getCombination());
         Assertions.assertEquals(TWO_PAIRS, hands.get(13).getCombination());
         Assertions.assertEquals(TWO_PAIRS, hands.get(14).getCombination());
+        Assertions.assertEquals(TWO_PAIRS, hands.get(15).getCombination());
+        Assertions.assertEquals(TWO_PAIRS, hands.get(16).getCombination());
+        Assertions.assertEquals(TWO_PAIRS, hands.get(17).getCombination());
 
-        Assertions.assertEquals(PAIR, hands.get(15).getCombination());
-        Assertions.assertEquals(PAIR, hands.get(16).getCombination());
+        Assertions.assertEquals(PAIR, hands.get(18).getCombination());
+        Assertions.assertEquals(PAIR, hands.get(19).getCombination());
+        Assertions.assertEquals(PAIR, hands.get(20).getCombination());
+        Assertions.assertEquals(PAIR, hands.get(21).getCombination());
 
-        Assertions.assertEquals(HIGH_CARD, hands.get(17).getCombination());
-        Assertions.assertEquals(HIGH_CARD, hands.get(18).getCombination());
-        System.out.println("====sortAndPrintAll====");
+        Assertions.assertEquals(HIGH_CARD, hands.get(22).getCombination());
+        Assertions.assertEquals(HIGH_CARD, hands.get(23).getCombination());
+        System.out.println("====Sorted====");
         hands.forEach(System.out::println);
     }
 
@@ -256,7 +275,7 @@ class PokerHandTest {
         Assertions.assertNotEquals(UNKNOWN, three.getCombination());
         Assertions.assertEquals(THREE_OF_A_KIND, three.getCombination());
         Assertions.assertNotEquals(HIGH_CARD, threeHigh.getCombination());
-        Assertions.assertEquals(1, three.compareTo(threeHigh));
+        Assertions.assertEquals(-1, threeHigh.compareTo(three));
     }
 
     @Test
@@ -274,22 +293,25 @@ class PokerHandTest {
         Assertions.assertEquals(TWO_PAIRS, two.getCombination());
         Assertions.assertNotEquals(HIGH_CARD, twoAvg.getCombination());
         Assertions.assertTrue(two.getCombinationValue() < twoAvg.getCombinationValue());
-        Assertions.assertEquals(1, twoAvg.compareTo(twoHigh));
+        Assertions.assertEquals(-1, twoHigh.compareTo(twoAvg));
     }
 
     @Test
     @Order(11)
     void checkPair() {
-        PokerHand pair = new PokerHand("JC JS 4D 2H 6C");
+        PokerHand pair = new PokerHand("JC JS 2D 3H 6C");
         PokerHand pairHigh = new PokerHand("JC JS 4D 3H 6C");
 
         hands.add(pair);
         hands.add(pairHigh);
 
+        Collections.sort(hands);
+        hands.forEach(System.out::println);
+
         Assertions.assertNotEquals(UNKNOWN, pair.getCombination());
         Assertions.assertEquals(PAIR, pairHigh.getCombination());
         Assertions.assertNotEquals(HIGH_CARD, pair.getCombination());
-        Assertions.assertEquals(1, pair.compareTo(pairHigh));
+        Assertions.assertEquals(-1, pairHigh.compareTo(pair));
     }
 
     @Test
