@@ -151,23 +151,27 @@ public final class PokerHand implements Comparable<PokerHand> {
     @Override
     public int compareTo(PokerHand hand) {
         int combinationOrdinalDiff = hand.getCombination().ordinal() - this.getCombination().ordinal();
-        return combinationOrdinalDiff != 0
-                ? combinationOrdinalDiff
-                : compareByCombinationValue(hand);
+        if (combinationOrdinalDiff != 0) {
+            return hand.getCombination().ordinal() - this.getCombination().ordinal() > 0 ? 1 : -1;
+        } else {
+            return compareByCombinationValue(hand);
+        }
     }
 
     private int compareByCombinationValue(PokerHand hand) {
         int combinationValueDiff = hand.getCombinationValue() - this.getCombinationValue();
-        return combinationValueDiff != 0
-                ? combinationValueDiff
-                : compareNonCombinationCards(hand);
+        if (combinationValueDiff != 0) {
+            return hand.getCombinationValue() - this.getCombinationValue() > 0 ? 1 : -1;
+        } else {
+            return compareNonCombinationCards(hand);
+        }
     }
 
     private int compareNonCombinationCards(PokerHand hand) {
         int result = 0;
-        for (int lastCardIndex = hand.getNonCombinationCards().size() - 1; lastCardIndex >= 0; lastCardIndex--) {
-            result = hand.getNonCombinationCards().get(lastCardIndex) - this.getNonCombinationCards().get(lastCardIndex);
-            if (result != 0) {
+        for (int index = hand.getNonCombinationCards().size() - 1; index >= 0; index--) {
+            if (!hand.getNonCombinationCards().get(index).equals(this.getNonCombinationCards().get(index))) {
+                result = hand.getNonCombinationCards().get(index) - this.getNonCombinationCards().get(index) < 0 ? -1 : 1;
                 return result;
             }
         }
@@ -239,18 +243,24 @@ public final class PokerHand implements Comparable<PokerHand> {
     private interface CombinationValidator extends Function<PokerHand, Combination> {
         static CombinationValidator isStraightOrFlush() {
             return hand -> {
-                boolean isOneKind = stream(hand.cards)
+                boolean isSameSuit = stream(hand.cards)
                         .allMatch(card -> Objects.equals(card[1], hand.cards[0][1]));
                 boolean isStraight = hand.cards[hand.cards.length - 1][0] - hand.cards[0][0] < 5
                         && countValues(hand).keySet().size() == 5;
 
-                if (isOneKind && isStraight) {
+                if (isSameSuit && isStraight) {
                     hand.combinationValue = hand.cards[hand.cards.length - 1][0];
                     return stream(hand.cards)
                             .mapToInt(card -> card[0])
                             .sum() == 60 ? ROYAL_FLUSH : STRAIGHT_FLUSH;
-                } else if (isOneKind) {
-                    hand.combinationValue = stream(hand.cards).mapToInt(card -> card[0]).sum();
+                } else if (isSameSuit) {
+                    hand.combinationValue = stream(hand.cards)
+                            .mapToInt(card -> card[0])
+                            .max()
+                            .getAsInt();
+                    countValues(hand).keySet().stream()
+                            .filter(key -> key < hand.combinationValue)
+                            .forEach(hand::addNonCombinationCard);
                     return FLUSH;
                 } else if (isStraight) {
                     hand.combinationValue = hand.cards[hand.cards.length - 1][0];
@@ -279,9 +289,11 @@ public final class PokerHand implements Comparable<PokerHand> {
                 Map<Integer, Long> map = countValues(hand);
                 boolean isFullHouse = map.keySet().size() == 2;
                 if (isFullHouse) {
-                    hand.combinationValue = map.keySet().stream()
-                            .mapToInt(i -> i)
-                            .sum();
+                    hand.combinationValue = map.entrySet().stream()
+                            .filter(entry -> entry.getValue() == 3)
+                            .mapToInt(Map.Entry::getKey)
+                            .findFirst()
+                            .getAsInt();
                 }
                 return isFullHouse ? FULL_HOUSE : UNKNOWN;
             };
@@ -319,11 +331,16 @@ public final class PokerHand implements Comparable<PokerHand> {
                         return PAIR;
                     }
                     case 2 -> {
-                        hand.combinationValue = map.entrySet().stream()
-                                .filter(entry -> entry.getValue() == limit)
+                        setCombinationValue(hand, map, limit);
+                        map.entrySet().stream()
+                                .filter(entry -> entry.getValue() == 2)
                                 .mapToInt(Map.Entry::getKey)
-                                .sum();
-                        addNonCombinationCard(hand, map, limit);
+                                .filter(key -> key < hand.combinationValue)
+                                .forEach(key -> hand.nonCombinationCards.add((int) Math.pow(key, 4)));
+                        map.entrySet().stream()
+                                .filter(entry -> entry.getValue() != 2)
+                                .mapToInt(Map.Entry::getKey)
+                                .forEach(hand::addNonCombinationCard);
                         return TWO_PAIRS;
                     }
                     default -> {
