@@ -5,8 +5,6 @@ import com.soddik.exception.CardAttributeException.UnexpectedCardAttributeKindEx
 import com.soddik.exception.CardAttributeException.UnexpectedCardAttributeValueException;
 import com.soddik.exception.HandCardAmountException;
 import com.soddik.exception.HandCardAmountException.UniqueCardException;
-import com.soddik.generator.DeckGenerator;
-import com.soddik.generator.HandGenerator;
 import org.junit.jupiter.api.*;
 
 import java.util.ArrayList;
