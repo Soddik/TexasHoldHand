@@ -7,8 +7,10 @@ import com.soddik.generator.RandomHandGenerator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class Main {
+    private static final Logger logger = Logger.getLogger(Main.class.getSimpleName());
     public static void main(String[] args) {
         DeckGenerator deckGenerator = new DeckGenerator();
         RandomHandGenerator randomHandGenerator = new RandomHandGenerator(deckGenerator);
@@ -19,7 +21,7 @@ public class Main {
         }
         Collections.shuffle(hands);
         hands.sort(PokerHand::compareTo);
-        //TODO impl logger
-        hands.forEach(System.out::println);
+
+        hands.forEach(hand -> logger.info(hand.toString()));
     }
 }

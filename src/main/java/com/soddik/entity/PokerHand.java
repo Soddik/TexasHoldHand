@@ -13,7 +13,7 @@ import static java.util.stream.Collectors.groupingBy;
 
 
 public final class PokerHand implements Comparable<PokerHand> {
-    private Integer[][] cards = new Integer[5][2];
+    private final Integer[][] cards;
     private final List<Integer> nonCombinationCards = new ArrayList<>();
     private final Combination combination;
     private Integer combinationValue = 0;
