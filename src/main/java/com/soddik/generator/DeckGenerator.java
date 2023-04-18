@@ -12,7 +12,7 @@ public final class DeckGenerator {
     public DeckGenerator() {
     }
 
-    public void generateDeck() {
+    public Map<String, List<Integer>> generateDeck() {
         for (String kind : kinds) {
             List<Integer> cards = new ArrayList<>();
             for (int index = 2; index < 15; index++) {
@@ -20,13 +20,14 @@ public final class DeckGenerator {
             }
             deck.put(kind, cards);
         }
+        return deck;
     }
 
     public List<String> getKinds() {
         return new ArrayList<>(kinds);
     }
 
-    public Map<String, List<Integer>> getDeck() {
-        return deck;
+    public void clearDeck(){
+        deck.clear();
     }
 }

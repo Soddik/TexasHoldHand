@@ -1,8 +1,8 @@
 package com.soddik;
 
-import com.soddik.dto.PokerHand;
+import com.soddik.entity.PokerHand;
 import com.soddik.generator.DeckGenerator;
-import com.soddik.generator.HandGenerator;
+import com.soddik.generator.RandomHandGenerator;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,14 +11,15 @@ import java.util.List;
 public class Main {
     public static void main(String[] args) {
         DeckGenerator deckGenerator = new DeckGenerator();
-        HandGenerator handGenerator = new HandGenerator(deckGenerator);
+        RandomHandGenerator randomHandGenerator = new RandomHandGenerator(deckGenerator);
 
         List<PokerHand> hands = new ArrayList<>();
-        for (int index = 0; index < 10; index++) {
-            hands.add(handGenerator.generateHand());
+        for (int index = 0; index < 6; index++) {
+            hands.add(randomHandGenerator.generateHand());
         }
         Collections.shuffle(hands);
         hands.sort(PokerHand::compareTo);
+        //TODO impl logger
         hands.forEach(System.out::println);
     }
 }

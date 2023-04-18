@@ -1,28 +1,42 @@
-package com.soddik.dto;
+package com.soddik.entity;
 
-import com.soddik.exception.CardAttributeException;
-import com.soddik.exception.HandCardAmountException;
+import com.soddik.exception.*;
+import com.soddik.parser.HandParser;
 
 import java.util.*;
 import java.util.function.Function;
 
-import static com.soddik.dto.PokerHand.Combination.*;
-import static com.soddik.exception.CardAttributeException.UnexpectedCardAttributeKindException;
-import static com.soddik.exception.CardAttributeException.UnexpectedCardAttributeValueException;
-import static com.soddik.exception.HandCardAmountException.UniqueCardException;
+import static com.soddik.entity.Combination.*;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.groupingBy;
 
 
 public final class PokerHand implements Comparable<PokerHand> {
-    private final Integer[][] cards = new Integer[5][2];
+    private Integer[][] cards = new Integer[5][2];
     private final List<Integer> nonCombinationCards = new ArrayList<>();
     private final Combination combination;
     private Integer combinationValue = 0;
 
-    public PokerHand(String hand) {
-        parseString(hand);
+    public PokerHand(String hand, HandParser parser) {
+        parser.parseString(hand);
+        this.cards = parser.getCards();
+        this.combination = CombinationValidator
+                .isStraightOrFlush()
+                .or(CombinationValidator.isFourOfAKind())
+                .or(CombinationValidator.isFullHouse())
+                .or(CombinationValidator.isThreeOfAKind())
+                .or(CombinationValidator.isPairs())
+                .or(CombinationValidator.highCard())
+                .apply(this);
+
+        if (nonCombinationCards.size() > 0) {
+            sortNonCombinationCards();
+        }
+    }
+
+    public PokerHand(Integer[][] cards) {
+        this.cards = cards;
         this.combination = CombinationValidator
                 .isStraightOrFlush()
                 .or(CombinationValidator.isFourOfAKind())
@@ -51,97 +65,6 @@ public final class PokerHand implements Comparable<PokerHand> {
 
     public Integer getCombinationValue() {
         return combinationValue;
-    }
-
-    private void parseString(String string) {
-        if (string == null) {
-            throw new NullPointerException("Entry string cannot be null");
-        }
-
-        String[] strCards = string.split(" ");
-        if (strCards.length == 5) {
-            createHandAndSort(strCards);
-        } else {
-            throw new HandCardAmountException(
-                    String.format("There must be exactly 5 cards in the hand, but there are %s", strCards.length));
-        }
-    }
-
-    private void createHandAndSort(String[] strCards) {
-        for (int index = 0; index < strCards.length; index++) {
-            String[] card = strCards[index].split("");
-            cards[index] = createCard(card);
-        }
-        sortCardsByValue(cards);
-    }
-
-    private Integer[] createCard(String[] card) {
-        if (card.length == 2) {
-            Integer value = switch (card[0]) {
-                case "A" -> 14;
-                case "K" -> 13;
-                case "Q" -> 12;
-                case "J" -> 11;
-                case "T" -> 10;
-                default -> validateNumericValue(card[0]);
-            };
-
-            Integer kind = switch (card[1]) {
-                case "S" -> 20;
-                case "H" -> 21;
-                case "D" -> 22;
-                case "C" -> 23;
-                default ->
-                        throw new UnexpectedCardAttributeKindException(String.format("Unexpected card kind %s", card[1]));
-            };
-
-            uniquenessOfCardsInHandCheck(value, kind);
-            return new Integer[]{value, kind};
-        } else {
-            throw new CardAttributeException(
-                    String.format("The card should contain 2 attributes, but it contains %s", card.length));
-        }
-    }
-
-    private Integer validateNumericValue(String value) {
-        if (value.matches("[2-9]")) {
-            int num = Integer.parseInt(value);
-            if (num > 1 && num < 10) {
-                return num;
-            }
-        }
-        throw new UnexpectedCardAttributeValueException(String.format("Unexpected card value %s", value));
-    }
-
-    private void uniquenessOfCardsInHandCheck(int value, int kind) {
-        for (Integer[] card : cards) {
-            if (card[0] != null && card[1] != null) {
-                if (card[0] == value && card[1] == kind) {
-                    throw new UniqueCardException(
-                            String.format("Unique cards must be in hand, but there is a duplicate with value: %s kind: %s", value, kind));
-                }
-            }
-        }
-    }
-
-    private void sortCardsByValue(Integer[][] cards) {
-        for (int i = 0; i < cards.length; i++) {
-            int pos = i;
-            int value = cards[i][0];
-            int kind = cards[i][1];
-            for (int j = i + 1; j < cards.length; j++) {
-                if (cards[j][0] < value) {
-                    pos = j;
-                    value = cards[j][0];
-                    kind = cards[j][1];
-                }
-            }
-            cards[pos][0] = cards[i][0];
-            cards[pos][1] = cards[i][1];
-
-            cards[i][0] = value;
-            cards[i][1] = kind;
-        }
     }
 
     private void addNonCombinationCard(Integer value) {
@@ -231,7 +154,7 @@ public final class PokerHand implements Comparable<PokerHand> {
                 case 22 -> "D";
                 case 23 -> "C";
                 default ->
-                        throw new UnexpectedCardAttributeKindException(String.format("Unexpected card kind %s", card[0]));
+                        throw new UnexpectedCardAttributeKindException(String.format("Unexpected card kind %s", card[1]));
             };
 
             sb.append(kind).append(" ");
@@ -387,19 +310,5 @@ public final class PokerHand implements Comparable<PokerHand> {
                 return value.equals(UNKNOWN) ? other.apply(hand) : value;
             };
         }
-    }
-
-    public enum Combination {
-        UNKNOWN,
-        HIGH_CARD,
-        PAIR,
-        TWO_PAIRS,
-        THREE_OF_A_KIND,
-        STRAIGHT,
-        FLUSH,
-        FULL_HOUSE,
-        FOUR_OF_A_KIND,
-        STRAIGHT_FLUSH,
-        ROYAL_FLUSH
     }
 }

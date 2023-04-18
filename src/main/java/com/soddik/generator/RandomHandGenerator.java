@@ -1,35 +1,36 @@
 package com.soddik.generator;
 
-import com.soddik.dto.PokerHand;
-import com.soddik.exception.CardAttributeException;
+import com.soddik.entity.PokerHand;
+import com.soddik.exception.UnexpectedCardAttributeValueException;
+import com.soddik.parser.HandParser;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class HandGenerator {
+public class RandomHandGenerator {
     private final DeckGenerator deckGenerator;
 
-    public HandGenerator(DeckGenerator deckGenerator) {
+    public RandomHandGenerator(DeckGenerator deckGenerator) {
         this.deckGenerator = deckGenerator;
-        deckGenerator.generateDeck();
     }
 
     public PokerHand generateHand() {
-        Map<String, List<Integer>> deck = deckGenerator.getDeck();
+        Map<String, List<Integer>> deck = deckGenerator.generateDeck();
         StringBuilder sb = new StringBuilder();
         for (int cardIndex = 0; cardIndex < 5; cardIndex++) {
             List<String> actualKinds = deckGenerator.getKinds().stream()
                     .filter(kind -> deck.get(kind).size() != 0)
                     .toList();
             String randomKind = actualKinds.get(ThreadLocalRandom.current().nextInt(0, actualKinds.size()));
-            getRandomCard(deck, sb, randomKind);
+            addRandomCard(deck, sb, randomKind);
         }
+        deckGenerator.clearDeck();
 
-        return new PokerHand(sb.toString().trim());
+        return new PokerHand(sb.toString().trim(), new HandParser());
     }
 
-    private void getRandomCard(Map<String, List<Integer>> deck, StringBuilder sb, String randomKind) {
+    private void addRandomCard(Map<String, List<Integer>> deck, StringBuilder sb, String randomKind) {
         Integer value = deck.get(randomKind).get(ThreadLocalRandom.current().nextInt(0, deck.get(randomKind).size()));
         deck.get(randomKind).remove(value);
         if (value < 10) {
@@ -42,7 +43,7 @@ public class HandGenerator {
                 case 11 -> "J";
                 case 10 -> "T";
                 default ->
-                        throw new CardAttributeException.UnexpectedCardAttributeValueException(String.format("Unexpected card value %s", value));
+                        throw new UnexpectedCardAttributeValueException(String.format("Unexpected card value %s", value));
             };
 
             sb.append(strValue);

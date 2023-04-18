@@ -1,40 +1,40 @@
-package com.soddik.dto;
+package com.soddik.entity;
 
-import com.soddik.exception.CardAttributeException;
-import com.soddik.exception.CardAttributeException.UnexpectedCardAttributeKindException;
-import com.soddik.exception.CardAttributeException.UnexpectedCardAttributeValueException;
-import com.soddik.exception.HandCardAmountException;
-import com.soddik.exception.HandCardAmountException.UniqueCardException;
+import com.soddik.exception.*;
+import com.soddik.parser.HandParser;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static com.soddik.dto.PokerHand.Combination.*;
+import static com.soddik.entity.Combination.*;
 
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestMethodOrder(OrderAnnotation.class)
 class PokerHandTest {
     private static List<PokerHand> hands;
+    private HandParser parser;
 
     @BeforeEach
     void setUp() {
         hands = new ArrayList<>();
+        parser = new HandParser();
     }
 
     @Test
     @Order(1)
-    void sortAndPrintAll() {
-        PokerHand royalFlush = new PokerHand("AC JC KC QC TC");
-        PokerHand straightFlush = new PokerHand("9C JC KC QC TC");
-        PokerHand four = new PokerHand("JC JS JD JH 6C");
-        PokerHand fullHouse = new PokerHand("JC JS JD 6H 6C");
-        PokerHand flush = new PokerHand("AC 2C KC QC TC");
-        PokerHand straight = new PokerHand("3S 2C 4H 5C 6D");
-        PokerHand three = new PokerHand("JC JS JD 3H 6C");
-        PokerHand two = new PokerHand("JC JS 3D 3H 6C");
-        PokerHand pair = new PokerHand("JC JS 4D 3H 6C");
-        PokerHand high = new PokerHand("AC QS TD 3H 6C");
+    void sortAndCheckCombination() {
+        PokerHand royalFlush = new PokerHand("AC JC KC QC TC", parser);
+        PokerHand straightFlush = new PokerHand("9C JC KC QC TC", parser);
+        PokerHand four = new PokerHand("JC JS JD JH 6C", parser);
+        PokerHand fullHouse = new PokerHand("JC JS JD 6H 6C", parser);
+        PokerHand flush = new PokerHand("AC 2C KC QC TC", parser);
+        PokerHand straight = new PokerHand("3S 2C 4H 5C 6D", parser);
+        PokerHand three = new PokerHand("JC JS JD 3H 6C", parser);
+        PokerHand two = new PokerHand("JC JS 3D 3H 6C", parser);
+        PokerHand pair = new PokerHand("JC JS 4D 3H 6C", parser);
+        PokerHand high = new PokerHand("AC QS TD 3H 6C", parser);
 
         hands.add(royalFlush);
         hands.add(straightFlush);
@@ -61,37 +61,35 @@ class PokerHandTest {
         Assertions.assertEquals(TWO_PAIRS, hands.get(7).getCombination());
         Assertions.assertEquals(PAIR, hands.get(8).getCombination());
         Assertions.assertEquals(HIGH_CARD, hands.get(9).getCombination());
-        System.out.println("====Sorted====");
-        hands.forEach(System.out::println);
     }
 
     @Test
     @Order(2)
     void sortAllWithDuplicates() {
-        PokerHand royalFlush = new PokerHand("AC JC KC QC TC");
-        PokerHand straightFlush = new PokerHand("9C JC KC QC TC");
-        PokerHand straightFlush1 = new PokerHand("9S JS 8S QS TS");
-        PokerHand four = new PokerHand("JC JS JD JH AC");
-        PokerHand four1 = new PokerHand("QC QS QD QH 7C");
-        PokerHand fullHouse = new PokerHand("JC JS JD AH AC");
-        PokerHand fullHouse1 = new PokerHand("QC QS QD 2H 2C");
-        PokerHand flush = new PokerHand("2C 3C 9C JC KC");
-        PokerHand flush1 = new PokerHand("5S 6S 7S JS KS");
-        PokerHand straight = new PokerHand("3S 2C 4H 5C 6D");
-        PokerHand straight1 = new PokerHand("3S 4C 5C 6S 7S");
-        PokerHand three = new PokerHand("JC JS JD 3H 9C");
-        PokerHand three2 = new PokerHand("QC QS QD 2H 7C");
-        PokerHand two = new PokerHand("JC JS 4D 4H 6C");
-        PokerHand two1 = new PokerHand("QC QS 4D 4H 6C");
-        PokerHand two2 = new PokerHand("QD QH 4S 4C 7C");
-        PokerHand two3 = new PokerHand("3C 3S TD TH 4C");
-        PokerHand two4 = new PokerHand("TD TH 2S 2C 9C");
-        PokerHand pair = new PokerHand("JC JS 4D 3H 6C");
-        PokerHand pair2 = new PokerHand("KC KS 4D 2H 6C");
-        PokerHand pair3 = new PokerHand("7C 7S 2D 3H 5C");
-        PokerHand pair4 = new PokerHand("7C 7S 4D 3H 5C");
-        PokerHand high = new PokerHand("AC QS TD 3H 6C");
-        PokerHand high1 = new PokerHand("KC QC TS 4H 5C");
+        PokerHand royalFlush = new PokerHand("AC JC KC QC TC", parser);
+        PokerHand straightFlush = new PokerHand("9C JC KC QC TC", parser);
+        PokerHand straightFlush1 = new PokerHand("9S JS 8S QS TS", parser);
+        PokerHand four = new PokerHand("JC JS JD JH AC", parser);
+        PokerHand four1 = new PokerHand("QC QS QD QH 7C", parser);
+        PokerHand fullHouse = new PokerHand("JC JS JD AH AC", parser);
+        PokerHand fullHouse1 = new PokerHand("QC QS QD 2H 2C", parser);
+        PokerHand flush = new PokerHand("2C 3C 9C JC KC", parser);
+        PokerHand flush1 = new PokerHand("5S 6S 7S JS KS", parser);
+        PokerHand straight = new PokerHand("3S 2C 4H 5C 6D", parser);
+        PokerHand straight1 = new PokerHand("3S 4C 5C 6S 7S", parser);
+        PokerHand three = new PokerHand("JC JS JD 3H 9C", parser);
+        PokerHand three2 = new PokerHand("QC QS QD 2H 7C", parser);
+        PokerHand two = new PokerHand("JC JS 4D 4H 6C", parser);
+        PokerHand two1 = new PokerHand("QC QS 4D 4H 6C", parser);
+        PokerHand two2 = new PokerHand("QD QH 4S 4C 7C", parser);
+        PokerHand two3 = new PokerHand("3C 3S TD TH 4C", parser);
+        PokerHand two4 = new PokerHand("TD TH 2S 2C 9C", parser);
+        PokerHand pair = new PokerHand("JC JS 4D 3H 6C", parser);
+        PokerHand pair2 = new PokerHand("KC KS 4D 2H 6C", parser);
+        PokerHand pair3 = new PokerHand("7C 7S 2D 3H 5C", parser);
+        PokerHand pair4 = new PokerHand("7C 7S 4D 3H 5C", parser);
+        PokerHand high = new PokerHand("AC QS TD 3H 6C", parser);
+        PokerHand high1 = new PokerHand("KC QC TS 4H 5C", parser);
 
         hands.add(royalFlush);
 
@@ -164,16 +162,14 @@ class PokerHandTest {
 
         Assertions.assertEquals(HIGH_CARD, hands.get(22).getCombination());
         Assertions.assertEquals(HIGH_CARD, hands.get(23).getCombination());
-        System.out.println("====Sorted====");
-        hands.forEach(System.out::println);
     }
 
 
     @Test
     @Order(3)
     void checkRoyalFlush() {
-        PokerHand royalFlush = new PokerHand("AC JC KC QC TC");
-        PokerHand royalFlushHigher = new PokerHand("AS JS KS QS TS");
+        PokerHand royalFlush = new PokerHand("AC JC KC QC TC", parser);
+        PokerHand royalFlushHigher = new PokerHand("AS JS KS QS TS", parser);
 
         hands.add(royalFlush);
         hands.add(royalFlushHigher);
@@ -187,8 +183,8 @@ class PokerHandTest {
     @Test
     @Order(4)
     void checkStraightFlush() {
-        PokerHand straightFlush = new PokerHand("9C JC KC QC TC");
-        PokerHand straightFlushLower = new PokerHand("9S JS 8S QS TS");
+        PokerHand straightFlush = new PokerHand("9C JC KC QC TC", parser);
+        PokerHand straightFlushLower = new PokerHand("9S JS 8S QS TS", parser);
 
         hands.add(straightFlush);
         hands.add(straightFlushLower);
@@ -202,8 +198,8 @@ class PokerHandTest {
     @Test
     @Order(5)
     void checkFour() {
-        PokerHand four = new PokerHand("JC JS JD JH 6C");//+
-        PokerHand fourHigher = new PokerHand("QC QS QD QH 7C");//+
+        PokerHand four = new PokerHand("JC JS JD JH 6C", parser);
+        PokerHand fourHigher = new PokerHand("QC QS QD QH 7C", parser);
 
         hands.add(four);
         hands.add(fourHigher);
@@ -217,8 +213,8 @@ class PokerHandTest {
     @Test
     @Order(6)
     void checkFullHouse() {
-        PokerHand fullHouse = new PokerHand("JC JS JD 6H 6C");
-        PokerHand fullHouseHigher = new PokerHand("QC QS QD 7H 7C");
+        PokerHand fullHouse = new PokerHand("JC JS JD 6H 6C", parser);
+        PokerHand fullHouseHigher = new PokerHand("QC QS QD 7H 7C", parser);
 
         hands.add(fullHouse);
         hands.add(fullHouseHigher);
@@ -232,14 +228,13 @@ class PokerHandTest {
     @Test
     @Order(7)
     void checkFlush() {
-        PokerHand flush = new PokerHand("5S 6S 7S JS KS");
-        PokerHand flushHigher = new PokerHand("2C 3C 9C JC KC");
+        PokerHand flush = new PokerHand("5S 6S 7S JS KS", parser);
+        PokerHand flushHigher = new PokerHand("2C 3C 9C JC KC", parser);
 
         hands.add(flush);
         hands.add(flushHigher);
 
         Collections.sort(hands);
-        hands.forEach(System.out::println);
 
         Assertions.assertNotEquals(UNKNOWN, flush.getCombination());
         Assertions.assertEquals(FLUSH, flush.getCombination());
@@ -250,8 +245,8 @@ class PokerHandTest {
     @Test
     @Order(8)
     void checkStraight() {
-        PokerHand straight = new PokerHand("3S 2C 4H 5C 6D");
-        PokerHand straightHigher = new PokerHand("3S 4C 5C 6S 7S");
+        PokerHand straight = new PokerHand("3S 2C 4H 5C 6D", parser);
+        PokerHand straightHigher = new PokerHand("3S 4C 5C 6S 7S", parser);
 
         hands.add(straight);
         hands.add(straightHigher);
@@ -265,8 +260,8 @@ class PokerHandTest {
     @Test
     @Order(9)
     void checkThree() {
-        PokerHand three = new PokerHand("JC JS JD 3H 6C");
-        PokerHand threeHigh = new PokerHand("QC QS QD 3H 7C");
+        PokerHand three = new PokerHand("JC JS JD 3H 6C", parser);
+        PokerHand threeHigh = new PokerHand("QC QS QD 3H 7C", parser);
 
         hands.add(three);
         hands.add(threeHigh);
@@ -280,10 +275,10 @@ class PokerHandTest {
     @Test
     @Order(10)
     void checkTwoPair() {
-        PokerHand two = new PokerHand("JC JS 3D 3H 6C");
-        PokerHand twoHigh = new PokerHand("QC QS 4D 4H 6C");
-        PokerHand twoAvg = new PokerHand("2S 2C 9C TH TD");
-        PokerHand two1 = new PokerHand("3C 3S 4C TH TD");
+        PokerHand two = new PokerHand("JC JS 3D 3H 6C", parser);
+        PokerHand twoHigh = new PokerHand("QC QS 4D 4H 6C", parser);
+        PokerHand twoAvg = new PokerHand("2S 2C 9C TH TD", parser);
+        PokerHand two1 = new PokerHand("3C 3S 4C TH TD", parser);
 
         hands.add(two);
         hands.add(twoAvg);
@@ -301,8 +296,8 @@ class PokerHandTest {
     @Test
     @Order(11)
     void checkPair() {
-        PokerHand pair = new PokerHand("JC JS 2D 3H 6C");
-        PokerHand pairHigh = new PokerHand("JC JS 4D 3H 6C");
+        PokerHand pair = new PokerHand("JC JS 2D 3H 6C", parser);
+        PokerHand pairHigh = new PokerHand("JC JS 4D 3H 6C", parser);
 
         hands.add(pair);
         hands.add(pairHigh);
@@ -316,8 +311,8 @@ class PokerHandTest {
     @Test
     @Order(12)
     void checkHigh() {
-        PokerHand high = new PokerHand("AC QS TD 3H 6C");
-        PokerHand lowerHigh = new PokerHand("KC QC TS 4H 5C");
+        PokerHand high = new PokerHand("AC QS TD 3H 6C", parser);
+        PokerHand lowerHigh = new PokerHand("KC QC TS 4H 5C", parser);
 
         hands.add(high);
         hands.add(lowerHigh);
@@ -330,79 +325,31 @@ class PokerHandTest {
 
     @Test
     @Order(13)
-    void checkHandCardAmountException() {
-        String msg = "";
-        try {
-            new PokerHand("AC QS TD 3H");
-        } catch (HandCardAmountException e) {
-            msg = e.getMessage();
-        } finally {
-            Assertions.assertEquals("There must be exactly 5 cards in the hand, but there are 4", msg);
-        }
+    void checkCardAmountException() {
+        Assertions.assertThrows(CardAmountException.class, () -> new PokerHand("AC QS TD 3H", parser));
     }
 
     @Test
     @Order(14)
-    void checkCardAttributeException() {
-        String msg = "";
-        try {
-            new PokerHand("21S AS TD 3H 6C");
-        } catch (CardAttributeException e) {
-            msg = e.getMessage();
-        } finally {
-            Assertions.assertEquals("The card should contain 2 attributes, but it contains 3", msg);
-        }
+    void checkCardAttributeAmountException() {
+        Assertions.assertThrows(CardAttributeAmountException.class, () -> new PokerHand("21S AS TD 3H 6C", parser));
     }
 
     @Test
     @Order(15)
     void checkUnexpectedCardAttributeValueException() {
-        String msg = "";
-        try {
-            new PokerHand("ZC QS TD 3H 6C");
-        } catch (UnexpectedCardAttributeValueException e) {
-            msg = e.getMessage();
-        } finally {
-            Assertions.assertEquals("Unexpected card value Z", msg);
-        }
+        Assertions.assertThrows(UnexpectedCardAttributeValueException.class, () -> new PokerHand("ZC QS TD 3H 6C", parser));
     }
 
     @Test
     @Order(16)
     void checkUnexpectedCardAttributeKindException() {
-        String msg = "";
-        try {
-            new PokerHand("AX QS TD 3H 6C");
-        } catch (UnexpectedCardAttributeKindException e) {
-            msg = e.getMessage();
-        } finally {
-            Assertions.assertEquals("Unexpected card kind X", msg);
-        }
+        Assertions.assertThrows(UnexpectedCardAttributeKindException.class, () -> new PokerHand("AX QS TD 3H 6C", parser));
     }
 
     @Test
     @Order(17)
     void checkUniqueCardException() {
-        String msg = "";
-        try {
-            new PokerHand("AS AS TD 3H 6C");
-        } catch (UniqueCardException e) {
-            msg = e.getMessage();
-        } finally {
-            Assertions.assertEquals("Unique cards must be in hand, but there is a duplicate with value: 14 kind: 20", msg);
-        }
-    }
-
-    @Test
-    @Order(18)
-    void checkNPE(){
-        String msg = "";
-        try {
-            new PokerHand(null);
-        } catch (NullPointerException e) {
-            msg = e.getMessage();
-        } finally {
-            Assertions.assertEquals("Entry string cannot be null", msg);
-        }
+        Assertions.assertThrows(UniqueCardException.class, () -> new PokerHand("AS AS TD 3H 6C", parser));
     }
 }
